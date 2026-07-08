@@ -175,7 +175,7 @@ void UpdateMyCamera(){
 }
 
 
-inline float GetHeightFromMesh(Mesh mesh, Matrix transform, float worldX, float worldZ){
+float GetHeightFromMesh(Mesh mesh, Matrix transform, float worldX, float worldZ){
     Matrix inverseMatrix = MatrixInvert(transform);
     // world to local transform
     Vector3 local = Vector3Transform((Vector3){worldX, 0, worldZ}, inverseMatrix);
