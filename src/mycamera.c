@@ -1,5 +1,6 @@
 #include "mycamera.h"
 
+#include <player.h>
 #include <stdio.h>
 
 #include "raylib.h"
@@ -8,10 +9,10 @@
 char posBuffer[128];
 char zoomBuffer[128];
 
-void InitCamera(MyCamera* camera) {
+void InitCamera(MyCamera* camera, Player* player) {
     printf("### InitCamera\n");
     camera->Camera.position = (Vector3){3.2f, 3.4f, 8.8f};
-    camera->Camera.target = (Vector3){0.0f, 1.0f, 0.0f};
+    camera->Camera.target = player->position;
     camera->Camera.up = (Vector3){0.0f, 1.0f, 0.0f};
     camera->Camera.fovy = 45.0f;
     camera->Camera.projection = CAMERA_PERSPECTIVE;
@@ -28,17 +29,18 @@ void InitCamera(MyCamera* camera) {
     CalculateCameraOffset(camera);
 }
 
-void UpdateMyCameraState(MyCamera* camera) {
+void UpdateMyCameraState(MyCamera* camera, Player* player) {
     if (IsMouseButtonDown(MOUSE_MIDDLE_BUTTON)) {
         Vector2 delta = GetMouseDelta();
 
         camera->Yaw += delta.x * camera->RotationSpeed;
         camera->Pitch += delta.y * camera->RotationSpeed;
-
         camera->Pitch = Clamp(camera->Pitch, 0.0f, 1.55f);
 
         CalculateCameraOffset(camera);
     }
+
+    camera->Camera.target = player->position;
 
     if (GetMouseWheelMove()) {
         Vector2 wheelMovement = GetMouseWheelMoveV();

@@ -1,4 +1,5 @@
 #pragma once
+#include "player.h"
 #include "raylib.h"
 
 typedef struct MyCamera {
@@ -15,7 +16,9 @@ typedef struct MyCamera {
     float Pitch;
 } MyCamera;
 
-void InitCamera(MyCamera* camera);
-void UpdateMyCameraState(MyCamera* camera);
+typedef struct Player Player;
+
+void InitCamera(MyCamera* camera, Player* player);
+void UpdateMyCameraState(MyCamera* camera, Player* player);
 void CalculateCameraOffset(MyCamera* camera);
 void DebugCameraPosition(MyCamera* camera);

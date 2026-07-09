@@ -1,7 +1,6 @@
 #pragma once
 #include <raylib.h>
 
-#include "mycamera.h"
 #include "world.h"
 
 typedef struct Player {
@@ -15,6 +14,8 @@ typedef struct Player {
     float movementSpeed;
     bool drawCollisionBox;
 } Player;
+
+typedef struct MyCamera MyCamera;
 
 void InitPlayer(Player* player);
 

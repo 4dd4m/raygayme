@@ -10,7 +10,7 @@ char playerBuffer[128];
 
 void InitPlayer(Player* player) {
     player->id = 0;
-    player->position = (Vector3){-2.5f, 0.0f, -2.5f};
+    player->position = (Vector3){-8.0f, 0.0f, -16.0f};
     player->playerName = "Adam";
     player->model = NULL;
     player->drawCollisionBox = true;
@@ -104,10 +104,8 @@ float GetHeightFromMesh(Mesh mesh, Matrix transform, float worldX, float worldZ)
     RayCollision collision = GetRayCollisionMesh(ray, mesh, transform);
 
     if (collision.hit) {
-        printf("### collision hit terrain\n");
         return collision.point.y;
     } else {
-        printf("### collision does not hit\n");
         return 0.0f;
     }
 

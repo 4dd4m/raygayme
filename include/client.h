@@ -1,5 +1,5 @@
 #pragma once
-#include "MyCamera.h"
+#include "mycamera.h"
 #include "player.h"
 #include "raylib.h"
 #include "world.h"

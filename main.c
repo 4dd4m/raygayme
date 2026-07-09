@@ -14,7 +14,7 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        UpdateMyCameraState(&client.Camera);
+        UpdateMyCameraState(&client.Camera, &client.player);
         UpdateWorld(&client.world);
         RenderWorldShadowMap(&client.world);
 

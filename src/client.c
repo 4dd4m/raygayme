@@ -9,7 +9,7 @@ void InitClient(Client* client) {
     InitWindow(client->renderConfig.width, client->renderConfig.height, client->renderConfig.title);
     SetTargetFPS(client->renderConfig.targetFps);
 
-    InitCamera(&client->Camera);
-    InitWorld(&client->world);
     InitPlayer(&client->player);
+    InitWorld(&client->world);
+    InitCamera(&client->Camera, &client->player);
 }
