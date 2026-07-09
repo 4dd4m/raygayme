@@ -11,18 +11,17 @@ char zoomBuffer[128];
 
 void InitCamera(MyCamera* camera, Player* player) {
     printf("### InitCamera\n");
-    camera->Camera.position = (Vector3){3.2f, 3.4f, 8.8f};
+    camera->Camera.position = (Vector3){-20.4f, 35.87f, 74.83f};
     camera->Camera.target = player->position;
     camera->Camera.up = (Vector3){0.0f, 1.0f, 0.0f};
     camera->Camera.fovy = 45.0f;
     camera->Camera.projection = CAMERA_PERSPECTIVE;
-    camera->Radius = 3.0f;
     camera->RotationSpeed = 0.01f;
     camera->ZoomSpeed = 1.0f;
 
     camera->Yaw = 0.0f;    // horizontal movement
     camera->Pitch = 0.3f;  // tilt/down/up movement
-    camera->Radius = 10.0f;
+    camera->Radius = 30.0f;
     camera->MinZoom = 3.0f;
     camera->MaxZoom = 50.0f;
 
