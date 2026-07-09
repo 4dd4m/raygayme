@@ -1,30 +1,29 @@
 #include <math.h>
-#include "raylib.h"
+
+#include "client.h"
 #include "debug.h"
-#include "game.h"
+#include "raylib.h"
 
-GameState state = STATE_GAME;
-
-DebugConfig debug = {0}; 
+DebugConfig debug = {0};
 
 int main(void) {
-    const int screenWidth = 2500;
-    const int screenHeight = 900;
+    Client client;
+    InitClient(&client);
 
-    InitWindow(screenWidth, screenHeight, "Test Project");
-    SetTargetFPS(165); 
-
-    Game game;
-    InitGame(&game);
-    
-    while (!WindowShouldClose())
-    {
-        UpdateMyCamera();
-        UpdateGame(&game);
-
+    while (!WindowShouldClose()) {
         BeginDrawing();
-            ClearBackground(BLACK);
-            DrawGame(&game);
+        ClearBackground(BLACK);
+
+        BeginMode3D(client.Camera.Camera);
+        UpdateMyCameraState(&client.Camera);
+        UpdateWorld(&client.world);
+        UpdatePlayer(&client.player, &client.Camera, &client.world);
+
+        EndMode3D();
+
+        DebugCameraPosition(&client.Camera);
+        DebugPlayerPosition(&client.player);
+
         EndDrawing();
     }
 

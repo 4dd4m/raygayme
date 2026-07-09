@@ -2,7 +2,7 @@
 Stop-Process -Name "game" -Force -ErrorAction SilentlyContinue
 
 # Build
-gcc.exe main.c src/*.c -o game.exe -O1 -Wall -std=c99 -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm
+gcc.exe main.c src/*.c -o game.exe -O1 -Wall -std=c99 -Wno-missing-braces -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm -g
 
 # Check build result
 if ($LASTEXITCODE -ne 0) {

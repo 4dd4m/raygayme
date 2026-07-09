@@ -18,3 +18,4 @@ typedef struct MyCamera {
 void InitCamera(MyCamera* camera);
 void UpdateMyCameraState(MyCamera* camera);
 void CalculateCameraOffset(MyCamera* camera);
+void DebugCameraPosition(MyCamera* camera);
