@@ -49,9 +49,19 @@ typedef struct World {
     Chunk* activeChunk;
     int chunkCount;
     char* worldName;
+    Shader shadowShader;
+    Shader shadowDepthShader;
+    RenderTexture2D shadowMap;
+    Vector3 lightDir;
+    Camera3D lightCamera;
+    Matrix lightViewProj;
+    int shadowLightViewProjLoc;
+    int shadowLightDirLoc;
+    int shadowMapLoc;
 } World;
 
 void InitWorld(World* world);
 void UpdateWorld(World* world);
 void DrawWorld(World* world);
+void RenderWorldShadowMap(World* world);
 void ShutdownWorld(World* world);

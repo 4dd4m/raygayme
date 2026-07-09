@@ -14,9 +14,12 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        BeginMode3D(client.Camera.Camera);
         UpdateMyCameraState(&client.Camera);
         UpdateWorld(&client.world);
+        RenderWorldShadowMap(&client.world);
+
+        BeginMode3D(client.Camera.Camera);
+        DrawWorld(&client.world);
         UpdatePlayer(&client.player, &client.Camera, &client.world);
 
         EndMode3D();
