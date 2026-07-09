@@ -1,6 +1,7 @@
 #include "world.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 void InitWorld(World* world) {
@@ -18,6 +19,16 @@ void InitWorld(World* world) {
     world->chunkCount = 1;
 
     world->activeChunk = chunk;
+
+    world->activeChunk->collisionCount++;
+
+    chunk->collisions = malloc(sizeof(CollisionObject) * world->activeChunk->collisionCount);
+
+    Model initialCollision = LoadModel("assets/terrain/collision.glb");
+
+    chunk->collisions[0] =
+        (CollisionObject){initialCollision.meshes[0], GetMeshBoundingBox(initialCollision.meshes[0]),
+                          initialCollision.transform};
 }
 
 void UpdateWorld(World* world) {
@@ -36,5 +47,11 @@ void UpdateWorld(World* world) {
                           (Vector3){currentChunk.coord.x, 0.0f, currentChunk.coord.z}, 1.0f, GRAY);
             }
         }
+    }
+}
+
+void ShutdownWorld(World* world) {
+    for (int i = 0; i < world->chunkCount; i++) {
+        free(&world->chunks[i]);
     }
 }

@@ -28,6 +28,6 @@ int main(void) {
     }
 
     CloseWindow();
-
+    ShutdownWorld(&client.world);
     return 0;
 }

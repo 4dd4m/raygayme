@@ -23,6 +23,7 @@ typedef struct WorldObject {
 } WorldObject;
 
 typedef struct CollisionObject {
+    Mesh mesh;
     BoundingBox boundingBox;
     Matrix transform;
 } CollisionObject;
