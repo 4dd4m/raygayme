@@ -1,21 +1,25 @@
 {
     "objects": [
         {
+            "id": "6b03349c-761e-4fec-aada-00b6c27ee63e",
+            "interactive": true,
             "name": "ASSET_TREE.000",
             "type": "ASSET_TREE",
             "chunk": "0",
             "position": [
-                21.087377548217773,
+                22.087377548217773,
                 0.00013840198516845703,
-                8.08222770690918
+                9.08222770690918
             ],
             "rotation": [
                 0.0,
-                0.28921306133270264,
+                0.6895380616188049,
                 0.0
             ]
         },
         {
+            "id": "0d0151c6-e68d-4e79-aa1e-b2cbb4bb3243",
+            "interactive": true,
             "name": "ASSET_TREE.001",
             "type": "ASSET_TREE",
             "chunk": "0",
@@ -31,6 +35,8 @@
             ]
         },
         {
+            "id": "8eae411a-0aa6-4e98-acd3-09c7966a0e66",
+            "interactive": true,
             "name": "ASSET_TREE.002",
             "type": "ASSET_TREE",
             "chunk": "0",
@@ -46,6 +52,8 @@
             ]
         },
         {
+            "id": "a4b3ade2-fe3a-4f97-9751-1d6bf472977e",
+            "interactive": true,
             "name": "ASSET_TREE.003",
             "type": "ASSET_TREE",
             "chunk": "0",
@@ -61,6 +69,8 @@
             ]
         },
         {
+            "id": "d337ec43-dba1-448a-aeb2-ea36e748d513",
+            "interactive": true,
             "name": "ASSET_TREE.004",
             "type": "ASSET_TREE",
             "chunk": "0",
@@ -76,6 +86,8 @@
             ]
         },
         {
+            "id": "3a3550d9-be25-4d4c-a0ff-c813867e0285",
+            "interactive": false,
             "name": "ASSET_TREE_TRUNK.000",
             "type": "ASSET_TREE_TRUNK",
             "chunk": "0",
@@ -91,6 +103,8 @@
             ]
         },
         {
+            "id": "0b5e59ee-468d-476b-a42e-91250e134ee2",
+            "interactive": false,
             "name": "ASSET_TREE_TRUNK.001",
             "type": "ASSET_TREE_TRUNK",
             "chunk": "0",
@@ -106,6 +120,8 @@
             ]
         },
         {
+            "id": "9ce92c7f-74c8-433a-ba42-fb5051a05e7c",
+            "interactive": false,
             "name": "ASSET_TREE_TRUNK.002",
             "type": "ASSET_TREE_TRUNK",
             "chunk": "0",
@@ -121,6 +137,8 @@
             ]
         },
         {
+            "id": "284c3824-fe5d-45ac-908d-d287b0789e03",
+            "interactive": false,
             "name": "COLLISION.002",
             "type": "COLLISION",
             "chunk": "0",
@@ -136,6 +154,8 @@
             ]
         },
         {
+            "id": "5e74a717-b90d-4b7d-a8bd-2b2ba1aa1344",
+            "interactive": false,
             "name": "COLLISION.001",
             "type": "COLLISION",
             "chunk": "0",
@@ -151,6 +171,8 @@
             ]
         },
         {
+            "id": "3c5df6e1-9db5-45ff-8ddb-d5c72862364d",
+            "interactive": false,
             "name": "COLLISION.003",
             "type": "COLLISION",
             "chunk": "0",
@@ -166,6 +188,8 @@
             ]
         },
         {
+            "id": "e90ab8c1-bf02-4bb1-9661-aef073b2bc4c",
+            "interactive": false,
             "name": "COLLISION.004",
             "type": "COLLISION",
             "chunk": "0",
@@ -181,21 +205,25 @@
             ]
         },
         {
+            "id": "8ebc7aa1-ac24-4bd0-abee-2c8a6fdab329",
+            "interactive": false,
             "name": "COLLISION.005",
             "type": "COLLISION",
             "chunk": "0",
             "position": [
-                21.071514129638672,
+                22.071514129638672,
                 -0.00047397613525390625,
-                7.890905380249023
+                8.890905380249023
             ],
             "rotation": [
                 0.0,
-                0.0,
-                -0.0
+                0.4003249704837799,
+                0.0
             ]
         },
         {
+            "id": "624a1a59-8be4-465b-9915-7604279c0e37",
+            "interactive": false,
             "name": "COLLISION.006",
             "type": "COLLISION",
             "chunk": "0",
@@ -211,6 +239,8 @@
             ]
         },
         {
+            "id": "54f7a46c-1515-46e3-bcc9-bf917f165eaf",
+            "interactive": false,
             "name": "COLLISION.007",
             "type": "COLLISION",
             "chunk": "0",
@@ -226,6 +256,8 @@
             ]
         },
         {
+            "id": "61ae970f-daed-4120-a023-aefee93bae73",
+            "interactive": false,
             "name": "COLLISION.008",
             "type": "COLLISION",
             "chunk": "0",

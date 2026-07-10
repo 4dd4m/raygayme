@@ -1,6 +1,7 @@
 import bpy
 import json
 import os
+import uuid
 
 objects = []
 
@@ -15,7 +16,11 @@ for map in mapping:
             
             data = obj.name.split("|")
             
+            if obj.get("id") is None:
+                obj["id"] = str(uuid.uuid4())
+            
             objects.append({
+                "id": obj["id"],
                 "name": data[0],
                 "type": map,
                 "chunk": data[1],
@@ -47,7 +52,7 @@ with open(output_path, "w", encoding="utf-8") as f:
 print(f"Exported {len(objects)} objects to {output_path}")
 
 #------------------------------------------------------------------
-# Export one of each static asset
+# Export one of each static asset ["Exact ModelName", AssetId]
 #------------------------------------------------------------------
 mapping = [
     ["Chunk_0_0","CHUNK_0_0"],
