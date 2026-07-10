@@ -78,4 +78,5 @@ void LoadStaticAssetsForChunk(int chunkId) {
     char* fileContent = LoadStaticObjectFile();
     cJSON* json = cJSON_Parse(fileContent);
     free(fileContent);
+    free(json);
 }
