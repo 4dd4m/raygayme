@@ -22,14 +22,18 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
         player->ray = GetScreenToWorldRay(GetMousePosition(), camera->Camera);
     }
 
+    // if clicked and the ray has > 0.f
     if (fabsf(player->ray.direction.y) > 0.0001f) {
-        float t = -player->ray.position.y / player->ray.direction.y;
+        RayCollision hit = GetRayCollisionMesh(player->ray, world->activeChunk->model.meshes[0],
+                                               world->activeChunk->model.transform);
 
-        player->targetLocation =
-            (Vector3){player->ray.position.x + player->ray.direction.x * t, 0.0f,
-                      player->ray.position.z + player->ray.direction.z * t};
+        if (hit.hit) {
+            player->targetLocation = hit.point;
+            player->hasTarget = true;
+        } else {
+            player->hasTarget = false;
+        }
 
-        player->hasTarget = true;
     } else {
         player->hasTarget = false;
     }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "assetLoader.h"
 #include "raymath.h"
 
 #define SHADOWMAP_SIZE 2048
@@ -42,7 +43,7 @@ void InitWorld(World* world) {
     chunk->coord.z = 0;
     chunk->isActive = true;
 
-    chunk->model = LoadModel("assets/terrain/terrain.obj");
+    chunk->model = LoadModel("assets/terrain.glb");
 
     world->chunkCount = 1;
 
@@ -50,20 +51,22 @@ void InitWorld(World* world) {
 
     world->activeChunk->collisionCount++;
 
+    LoadStaticAssetsForChunk(0);
+
     chunk->collisions = malloc(sizeof(CollisionObject) * world->activeChunk->collisionCount);
 
-    Model initialCollision = LoadModel("assets/terrain/collision.glb");
+    // Model initialCollision = LoadModel("assets/terrain/collision.glb");
 
-    chunk->collisions[0] =
-        (CollisionObject){initialCollision.meshes[0], GetMeshBoundingBox(initialCollision.meshes[0]),
-                          initialCollision.transform};
+    // chunk->collisions[0] =
+    //     (CollisionObject){initialCollision.meshes[0],
+    //     GetMeshBoundingBox(initialCollision.meshes[0]),
+    //                       initialCollision.transform};
 
     // SET Shaders
 
-    world->shadowShader =
-        LoadShader("assets/terrain/shaders/shadow.vs", "assets/terrain/shaders/shadow.fs");
-    world->shadowDepthShader = LoadShader("assets/terrain/shaders/shadow_depth.vs",
-                                          "assets/terrain/shaders/shadow_depth.fs");
+    world->shadowShader = LoadShader("assets/shaders/shadow.vs", "assets/shaders/shadow.fs");
+    world->shadowDepthShader =
+        LoadShader("assets/shaders/shadow_depth.vs", "assets/shaders/shadow_depth.fs");
 
     world->shadowShader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(world->shadowShader, "mvp");
     world->shadowShader.locs[SHADER_LOC_MATRIX_MODEL] =

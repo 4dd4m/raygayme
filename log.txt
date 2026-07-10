@@ -39,23 +39,27 @@ INFO: FONT: Default font loaded successfully (224 glyphs)
 INFO: SYSTEM: Working Directory: C:\Users\Dev\raylibTest
 INFO: TIMER: Target time per frame: 6.061 milliseconds
 ### Initializing World
-INFO: FILEIO: [assets/terrain/terrain.obj] Text file loaded successfully
-INFO: VAO: [ID 2] Mesh uploaded successfully to VRAM (GPU)
-INFO: FILEIO: [assets/terrain/collision.glb] File loaded successfully
-INFO: MODEL: [assets/terrain/collision.glb] Model basic data (glb) loaded successfully
+INFO: FILEIO: [assets/terrain.glb] File loaded successfully
+INFO: MODEL: [assets/terrain.glb] Model basic data (glb) loaded successfully
 INFO:     > Meshes count: 1
 INFO:     > Materials count: 0 (+1 default)
-INFO: VAO: [ID 3] Mesh uploaded successfully to VRAM (GPU)
-INFO: FILEIO: [assets/terrain/shaders/shadow.vs] Text file loaded successfully
-INFO: FILEIO: [assets/terrain/shaders/shadow.fs] Text file loaded successfully
+INFO: VAO: [ID 2] Mesh uploaded successfully to VRAM (GPU)
+Error opening static objects file: No such file or directory
+INFO: FILEIO: [assets/shaders/shadow.vs] Text file loaded successfully
+INFO: FILEIO: [assets/shaders/shadow.fs] Text file loaded successfully
 INFO: SHADER: [ID 4] Vertex shader compiled successfully
 INFO: SHADER: [ID 5] Fragment shader compiled successfully
 INFO: SHADER: [ID 6] Program shader loaded successfully
-INFO: FILEIO: [assets/terrain/shaders/shadow_depth.vs] Text file loaded successfully
-INFO: FILEIO: [assets/terrain/shaders/shadow_depth.fs] Text file loaded successfully
+INFO: FILEIO: [assets/shaders/shadow_depth.vs] Text file loaded successfully
+INFO: FILEIO: [assets/shaders/shadow_depth.fs] Text file loaded successfully
 INFO: SHADER: [ID 4] Vertex shader compiled successfully
 INFO: SHADER: [ID 5] Fragment shader compiled successfully
 INFO: SHADER: [ID 7] Program shader loaded successfully
 INFO: TEXTURE: [ID 3] Texture loaded successfully (2048x2048 | R8G8B8A8 | 1 mipmaps)
 INFO: TEXTURE: [ID 1] Depth renderbuffer loaded successfully (32 bits)
 INFO: FBO: [ID 1] Framebuffer object created successfully
+### InitCamera
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+INFO: SHADER: [ID 3] Default shader unloaded successfully
+INFO: TEXTURE: [ID 1] Default texture unloaded successfully
+INFO: Window closed successfully

@@ -7,6 +7,7 @@ typedef unsigned int EntityId;
 
 typedef struct Asset {
     Model model;
+    bool isLoaded;
 } Asset;
 
 typedef struct ChunkCoord {
