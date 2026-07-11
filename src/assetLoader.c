@@ -202,7 +202,7 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         }
         Model* model = &(GetAsset(assetId)->model);
 
-        // bounding box by default goes to origin, so pull it back where the object really is
+        // bounding box by default goes to origin, so pull it back where the object really
         BoundingBox box = GetModelBoundingBox(*model);
         box.min = Vector3Add(box.min, position);
         box.max = Vector3Add(box.max, position);

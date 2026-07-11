@@ -64,10 +64,24 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
 
             bool isCollided = false;
 
-            for (int i = 0; i < world->activeChunk->collisionCount; i++) {
-                if (CheckCollisionBoxes(playerBox, world->activeChunk->collisions[i].boundingBox)) {
-                    isCollided = true;
-                    break;
+            // check collision for world->chunk
+            // for (int i = 0; i < world->activeChunk->collisionCount; i++) {
+            //     if (CheckCollisionBoxes(playerBox, world->activeChunk->collisions[i].boundingBox))
+            //     {
+            //         isCollided = true;
+            //         break;
+            //     }
+            // }
+
+            // check collision agains world objects
+            for (int i = 0; i < world->worldObjectCount; i++) {
+                switch (world->worldObjects[i].type) {
+                    case COLLISION_TREE:
+                        if (CheckCollisionBoxes(playerBox, world->worldObjects[i].boundingBox)) {
+                            isCollided = true;
+                            break;
+                        }
+                        break;
                 }
             }
 
