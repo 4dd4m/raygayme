@@ -11,6 +11,7 @@ typedef struct WorldObject {
     Vector3 position;
     Vector3 rotation;
     Model* model;
+    BoundingBox boundingBox;
 } WorldObject;
 
 #define MAX_CHUNKS 256
@@ -38,7 +39,7 @@ typedef struct Chunk {
     ChunkCoord coord;
 
     Mesh mesh;
-    Model model;
+    Model model;  // terrain
 
     WorldObject* objects;
     int objectCount;

@@ -8,6 +8,7 @@
 
 #include "assetLoader.h"
 #include "cJSON.h"
+#include "raymath.h"
 
 Asset Assets[ASSET_COUNT] = {0};
 
@@ -201,6 +202,11 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         }
         Model* model = &(GetAsset(assetId)->model);
 
+        // bounding box by default goes to origin, so pull it back where the object really is
+        BoundingBox box = GetModelBoundingBox(*model);
+        box.min = Vector3Add(box.min, position);
+        box.max = Vector3Add(box.max, position);
+
         WorldObject parsedObject = (WorldObject){.id = strdup(id->valuestring),
                                                  .interactive = isInteractive,
                                                  .name = strdup(name->valuestring),
@@ -208,7 +214,8 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
                                                  .chunk = parsedChunk,
                                                  .position = position,
                                                  .rotation = rotation,
-                                                 .model = model};
+                                                 .model = model,
+                                                 .boundingBox = box};
 
         fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n", parsedObject.name,
                 parsedObject.type, parsedObject.id, parsedObject.position.x, parsedObject.position.y,

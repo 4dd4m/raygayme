@@ -137,28 +137,30 @@ void DrawWorld(World* world) {
 
     DrawGrid(10, 10);
 
-    if (world->chunkCount > 0) {
-        for (int i = 0; i < world->chunkCount; i++) {
-            Chunk currentChunk = world->chunks[i];
+    // iterate all collision and draw
+    // for (int i = 0; i < world->chunkCount; i++) {
+    //     Chunk currentChunk = world->chunks[i];
 
-            if (currentChunk.isActive) {
-                for (int x = 0; x < currentChunk.collisionCount; x++) {
-                    DrawBoundingBox(currentChunk.collisions[x].boundingBox, RED);
-                }
+    //     if (currentChunk.isActive) {
+    //         for (int x = 0; x < currentChunk.collisionCount; x++) {
+    //             DrawBoundingBox(currentChunk.collisions[x].boundingBox, RED);
+    //         }
+    //     }
+    // }
 
-                DrawModel(currentChunk.model,
-                          (Vector3){currentChunk.coord.x, 0.0f, currentChunk.coord.z}, 1.0f, GRAY);
-            }
-        }
-    }
+    // draw terrain
+    DrawModel(
+        world->chunks[0].model,
+        (Vector3){world->chunks[0].coord.x, world->chunks[0].coord.y, world->chunks[0].coord.z},
+        1.0f, GRAY);
 
+    // draw all world objects
     for (int i = 0; i < world->worldObjectCount; i++) {
         WorldObject obj = world->worldObjects[i];
-        DrawModel(*obj.model, obj.position, 1.0f, WHITE);
 
         switch (obj.type) {
             case COLLISION_TREE:
-                DrawModel(*obj.model, obj.position, 1.0f, RED);
+                DrawBoundingBox(obj.boundingBox, RED);
                 break;
             default:
                 DrawModel(*obj.model, obj.position, 1.0f, WHITE);
