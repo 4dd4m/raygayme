@@ -106,6 +106,12 @@ char* LoadStaticObjectFile() {
 
 WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
     char* fileContent = LoadStaticObjectFile();
+    WorldObject* worldObjects = NULL;
+    int objectCount = 0;
+    int i = 0;
+    if (worldObjectCount) {
+        *worldObjectCount = 0;
+    }
     if (fileContent == NULL) {
         goto error;
     }
@@ -128,16 +134,14 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         goto error;
     }
 
-    int objectCount = cJSON_GetArraySize(objects);
-    WorldObject* worldObjects =
-        malloc((objectCount > 0 ? (size_t)objectCount : 1u) * sizeof(WorldObject));
+    objectCount = cJSON_GetArraySize(objects);
+    worldObjects = malloc((objectCount > 0 ? (size_t)objectCount : 1u) * sizeof(WorldObject));
     if (worldObjects == NULL) {
         goto error;
     }
 
     printf("--- Found %d objects\n", objectCount);
 
-    int i = 0;
     cJSON_ArrayForEach(object, objects) {
         cJSON* id = cJSON_GetObjectItemCaseSensitive(object, "id");
         cJSON* interactive = cJSON_GetObjectItemCaseSensitive(object, "interactive");
@@ -151,9 +155,9 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
 
         if (cJSON_IsArray(positions) && cJSON_GetArraySize(positions) == 3) {
             position = (Vector3){
-                .x = (float)cJSON_GetArrayItem(positions, 0)->valuedouble,
-                .y = (float)cJSON_GetArrayItem(positions, 1)->valuedouble,
-                .z = (float)cJSON_GetArrayItem(positions, 2)->valuedouble,
+                .x = (double)cJSON_GetArrayItem(positions, 0)->valuedouble,
+                .y = (double)cJSON_GetArrayItem(positions, 1)->valuedouble,
+                .z = (double)cJSON_GetArrayItem(positions, 2)->valuedouble,
             };
         } else {
             goto error;
@@ -163,9 +167,9 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
 
         if (cJSON_IsArray(rotations) && cJSON_GetArraySize(rotations) == 3) {
             rotation = (Vector3){
-                .x = (float)cJSON_GetArrayItem(rotations, 0)->valuedouble,
-                .y = (float)cJSON_GetArrayItem(rotations, 1)->valuedouble,
-                .z = (float)cJSON_GetArrayItem(rotations, 2)->valuedouble,
+                .x = (double)cJSON_GetArrayItem(rotations, 0)->valuedouble,
+                .y = (double)cJSON_GetArrayItem(rotations, 1)->valuedouble,
+                .z = (double)cJSON_GetArrayItem(rotations, 2)->valuedouble,
             };
         } else {
             goto error;
@@ -206,28 +210,27 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
                                                  .rotation = rotation,
                                                  .model = model};
 
-        fprintf(stdout, "%s\t\t Type:%d\tId:%s\n", parsedObject.name, parsedObject.type,
-                parsedObject.id);
+        fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n", parsedObject.name,
+                parsedObject.type, parsedObject.id, parsedObject.position.x, parsedObject.position.y,
+                parsedObject.position.z);
 
         if (i < objectCount) {
             worldObjects[i++] = parsedObject;
         }
-
-        i = objectCount;
     }
 
     fprintf(stderr, ">>> WorldObjects parsing have been finished\n");
-    goto end;
+    if (worldObjectCount) {
+        *worldObjectCount = i;
+    }
+    if (fileContent) free(fileContent);
+    if (json) cJSON_Delete(json);
+    return worldObjects;
 
 error:
     fprintf(stderr, "Error while Parsing Objects.json\n");
     if (fileContent) free(fileContent);
     if (json) cJSON_Delete(json);
     if (worldObjects) free(worldObjects);
-
-end:
-    if (fileContent) free(fileContent);
-    if (json) cJSON_Delete(json);
-    // to remove
-    return worldObjects;
+    return NULL;
 }

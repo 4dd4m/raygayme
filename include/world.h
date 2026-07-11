@@ -24,6 +24,7 @@ typedef struct Asset {
 
 typedef struct ChunkCoord {
     int x;
+    int y;
     int z;
 } ChunkCoord;
 

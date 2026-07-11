@@ -40,6 +40,7 @@ void InitWorld(World* world) {
     // load starting chunk
     Chunk* chunk = &world->chunks[0];
     chunk->coord.x = 0;
+    chunk->coord.y = 0;
     chunk->coord.z = 0;
     chunk->objects = NULL;
     chunk->objectCount = 0;
@@ -90,6 +91,13 @@ void InitWorld(World* world) {
 
     SetShaderValueTexture(world->shadowShader, world->shadowMapLoc, world->shadowMap.texture);
     SetModelShader(&world->activeChunk->model, world->shadowShader);
+    if (world->worldObjects && world->worldObjectCount > 0) {
+        for (int i = 0; i < world->worldObjectCount; i++) {
+            if (world->worldObjects[i].model) {
+                SetModelShader(world->worldObjects[i].model, world->shadowShader);
+            }
+        }
+    }
 }
 
 void UpdateWorld(World* world) { (void)world; }
@@ -103,8 +111,19 @@ void RenderWorldShadowMap(World* world) {
 
     SetModelShader(&world->activeChunk->model, world->shadowDepthShader);
     DrawModel(world->activeChunk->model,
-              (Vector3){world->activeChunk->coord.x, 0.0f, world->activeChunk->coord.z}, 1.0f,
-              WHITE);
+              (Vector3){world->activeChunk->coord.x, world->activeChunk->coord.y,
+                        world->activeChunk->coord.z},
+              1.0f, WHITE);
+    if (world->worldObjects && world->worldObjectCount > 0) {
+        for (int i = 0; i < world->worldObjectCount; i++) {
+            WorldObject obj = world->worldObjects[i];
+            if (obj.model) {
+                SetModelShader(obj.model, world->shadowDepthShader);
+                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                SetModelShader(obj.model, world->shadowShader);
+            }
+        }
+    }
     SetModelShader(&world->activeChunk->model, world->shadowShader);
 
     EndMode3D();
@@ -135,8 +154,18 @@ void DrawWorld(World* world) {
 
     for (int i = 0; i < world->worldObjectCount; i++) {
         WorldObject obj = world->worldObjects[i];
-        DrawModel(*obj.model, obj.position, 1.0f, GRAY);
+        DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+
+        switch (obj.type) {
+            case COLLISION_TREE:
+                DrawModel(*obj.model, obj.position, 1.0f, RED);
+                break;
+            default:
+                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                break;
+        }
     }
+    DrawCylinder((Vector3){0}, 0.2f, 0.2f, 50.0f, 4, YELLOW);
 }
 
 void ShutdownWorld(World* world) {

@@ -39,6 +39,8 @@
       float diff = max(dot(normalize(fragNormal), normalize(-lightDir)), 0.0);
       float shadow = ShadowFactor(fragPosLight);
 
-      float lighting = 0.25 + (1.0 - shadow) * diff;
+      float ambient = 0.35;
+      float intensity = 1.3;
+      float lighting = ambient + (1.0 - shadow) * diff * intensity;
       finalColor = vec4(base * lighting, colDiffuse.a);
   }

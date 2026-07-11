@@ -10,7 +10,7 @@ char playerBuffer[128];
 
 void InitPlayer(Player* player) {
     player->id = 0;
-    player->position = (Vector3){-20.0f, 0.0f, -40.0f};
+    player->position = (Vector3){40.0f, 0.0f, 10.0f};
     player->playerName = "Adam";
     player->model = NULL;
     player->drawCollisionBox = true;

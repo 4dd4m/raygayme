@@ -8,7 +8,7 @@ objects = []
 #--------------------------------------------------
 # Export Every Static Object Position and rotation
 #--------------------------------------------------
-mapping = ["ASSET_TREE", "ASSET_TREE_TRUNK", "COLLISION"]
+mapping = ["ASSET_TREE", "ASSET_TREE_TRUNK", "COLLISION_TREE"]
 
 for map in mapping:
     for obj in bpy.context.scene.objects:
@@ -18,9 +18,13 @@ for map in mapping:
             
             if obj.get("id") is None:
                 obj["id"] = str(uuid.uuid4())
+                
+            if obj.get("interactive") is None:
+                raise TypeError(f"interactive property is not set on: {obj.name}")
             
             objects.append({
                 "id": obj["id"],
+                "interactive": obj.get("interactive"),
                 "name": data[0],
                 "type": map,
                 "chunk": data[1],
@@ -38,7 +42,7 @@ for map in mapping:
 
 output_path = os.path.join(
     os.path.dirname(bpy.data.filepath),
-    "static_objects.json"
+    "objects.json"
 )
 
 
@@ -58,6 +62,7 @@ mapping = [
     ["Chunk_0_0","CHUNK_0_0"],
     ["ASSET_TREE.000|0", "ASSET_TREE"],
     ["ASSET_TREE_TRUNK.000|0", "ASSET_TREE_TRUNK"],
+    ["COLLISION.001|0", "COLLISION_TREE"],
 ]
 
 
@@ -73,6 +78,8 @@ for map in mapping:
             pathPrefix = "chunks/"
         elif "ASSET" in map[1]:
             pathPrefix = "static_assets/"
+        elif "COLLISION" in map[1]:
+            pathPrefix = "collisions/"
         else:
             pathPrefix = ""
         
@@ -82,6 +89,10 @@ for map in mapping:
         bpy.context.view_layer.objects.active = terrain_object
 
         terrain_output_path = os.path.join(os.path.dirname(bpy.data.filepath),f"{pathPrefix}{map[1]}.glb")
+        
+        original_location = terrain_object.location.copy()
+
+        terrain_object.location = (0.0, 0.0, 0.0)
 
         bpy.ops.export_scene.gltf(
             filepath=terrain_output_path,
@@ -93,3 +104,5 @@ for map in mapping:
             export_normals=True,
             export_materials="EXPORT"
         )
+        
+        terrain_object.location = original_location

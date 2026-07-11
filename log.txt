@@ -50,8 +50,8 @@ DEBUG:     > Images count: 0
 DEBUG:     > Textures count: 0
 DEBUG:     > Primitives (triangles only) count based on hierarchy : 1
 INFO: VAO: [ID 2] Mesh uploaded successfully to VRAM (GPU)
-!!! Static File Json has been loaded with a size of 7599
---- Found 16 objects
+!!! Static File Json has been loaded with a size of 5849
+--- Found 13 objects
 INFO: FILEIO: [assets/static_assets/ASSET_TREE.glb] File loaded successfully
 INFO: MODEL: [assets/static_assets/ASSET_TREE.glb] Model basic data (glb) loaded successfully
 INFO:     > Meshes count: 1
@@ -62,11 +62,11 @@ DEBUG:     > Textures count: 0
 DEBUG:     > Primitives (triangles only) count based on hierarchy : 2
 INFO: VAO: [ID 3] Mesh uploaded successfully to VRAM (GPU)
 INFO: VAO: [ID 4] Mesh uploaded successfully to VRAM (GPU)
-<<< Load ModelASSET_TREE.000		 Type:0	Id:6b03349c-761e-4fec-aada-00b6c27ee63e
-Cached Asset >>> ASSET_TREE.001		 Type:0	Id:0d0151c6-e68d-4e79-aa1e-b2cbb4bb3243
-Cached Asset >>> ASSET_TREE.002		 Type:0	Id:8eae411a-0aa6-4e98-acd3-09c7966a0e66
-Cached Asset >>> ASSET_TREE.003		 Type:0	Id:a4b3ade2-fe3a-4f97-9751-1d6bf472977e
-Cached Asset >>> ASSET_TREE.004		 Type:0	Id:d337ec43-dba1-448a-aeb2-ea36e748d513
+<<< Load ModelASSET_TREE.000		 Type:0	Id:6b03349c-761e-4fec-aada-00b6c27ee63e | X: 22.087377548217773 Y: 0.00013840198516845703 Z: 9.0822277069091797
+Cached Asset >>> ASSET_TREE.001		 Type:0	Id:0d0151c6-e68d-4e79-aa1e-b2cbb4bb3243 | X: 32.366226196289062 Y: 0.00013840198516845703 Z: 9.186793327331543
+Cached Asset >>> ASSET_TREE.002		 Type:0	Id:8eae411a-0aa6-4e98-acd3-09c7966a0e66 | X: 27.322351455688477 Y: -0.045160293579101562 Z: 5.9960298538208008
+Cached Asset >>> ASSET_TREE.003		 Type:0	Id:a4b3ade2-fe3a-4f97-9751-1d6bf472977e | X: 36.322349548339844 Y: -0.045160293579101562 Z: -1.0039701461791992
+Cached Asset >>> ASSET_TREE.004		 Type:0	Id:d337ec43-dba1-448a-aeb2-ea36e748d513 | X: 24.322349548339844 Y: -0.045160293579101562 Z: -3.0039701461791992
 INFO: FILEIO: [assets/static_assets/ASSET_TREE_TRUNK.glb] File loaded successfully
 INFO: MODEL: [assets/static_assets/ASSET_TREE_TRUNK.glb] Model basic data (glb) loaded successfully
 INFO:     > Meshes count: 1
@@ -77,9 +77,9 @@ DEBUG:     > Textures count: 0
 DEBUG:     > Primitives (triangles only) count based on hierarchy : 2
 INFO: VAO: [ID 5] Mesh uploaded successfully to VRAM (GPU)
 INFO: VAO: [ID 6] Mesh uploaded successfully to VRAM (GPU)
-<<< Load ModelASSET_TREE_TRUNK.000		 Type:1	Id:3a3550d9-be25-4d4c-a0ff-c813867e0285
-Cached Asset >>> ASSET_TREE_TRUNK.001		 Type:1	Id:0b5e59ee-468d-476b-a42e-91250e134ee2
-Cached Asset >>> ASSET_TREE_TRUNK.002		 Type:1	Id:9ce92c7f-74c8-433a-ba42-fb5051a05e7c
+<<< Load ModelASSET_TREE_TRUNK.000		 Type:1	Id:3a3550d9-be25-4d4c-a0ff-c813867e0285 | X: 21.252460479736328 Y: 0 Z: 2.9675025939941406
+Cached Asset >>> ASSET_TREE_TRUNK.001		 Type:1	Id:0b5e59ee-468d-476b-a42e-91250e134ee2 | X: 31.252460479736328 Y: 0 Z: -5.0324974060058594
+Cached Asset >>> ASSET_TREE_TRUNK.002		 Type:1	Id:9ce92c7f-74c8-433a-ba42-fb5051a05e7c | X: 29.252460479736328 Y: 0 Z: 1.9675025939941406
 INFO: FILEIO: [assets/collisions/COLLISION_TREE.glb] File loaded successfully
 INFO: MODEL: [assets/collisions/COLLISION_TREE.glb] Model basic data (glb) loaded successfully
 INFO:     > Meshes count: 1
@@ -90,14 +90,11 @@ DEBUG:     > Textures count: 0
 DEBUG:     > Primitives (triangles only) count based on hierarchy : 1
 INFO: VAO: [ID 7] Mesh uploaded successfully to VRAM (GPU)
 >>> WorldObjects parsing have been finished
-<<< Load ModelCOLLISION_TREE.002		 Type:2	Id:284c3824-fe5d-45ac-908d-d287b0789e03
-Cached Asset >>> COLLISION_TREE.001		 Type:2	Id:5e74a717-b90d-4b7d-a8bd-2b2ba1aa1344
-Cached Asset >>> COLLISION_TREE.003		 Type:2	Id:3c5df6e1-9db5-45ff-8ddb-d5c72862364d
-Cached Asset >>> COLLISION_TREE.004		 Type:2	Id:e90ab8c1-bf02-4bb1-9661-aef073b2bc4c
-Cached Asset >>> COLLISION_TREE.005		 Type:2	Id:8ebc7aa1-ac24-4bd0-abee-2c8a6fdab329
-Cached Asset >>> COLLISION_TREE.006		 Type:2	Id:624a1a59-8be4-465b-9915-7604279c0e37
-Cached Asset >>> COLLISION_TREE.007		 Type:2	Id:54f7a46c-1515-46e3-bcc9-bf917f165eaf
-Cached Asset >>> COLLISION_TREE.008		 Type:2	Id:61ae970f-daed-4120-a023-aefee93bae73
+<<< Load ModelCOLLISION_TREE.001		 Type:2	Id:16cc0f59-ff8c-47f9-aa49-f611d3635de5 | X: 22 Y: 1 Z: 9
+Cached Asset >>> COLLISION_TREE.002		 Type:2	Id:50300234-7cd2-4e42-81f6-6d30702f2e69 | X: 24 Y: 1 Z: -3
+Cached Asset >>> COLLISION_TREE.003		 Type:2	Id:d6567f44-2bd4-40a2-ba0e-dbdcedd5b73b | X: 36 Y: 1 Z: -1
+Cached Asset >>> COLLISION_TREE.004		 Type:2	Id:64bc93b3-714c-459a-8b6b-531b9debad21 | X: 28 Y: 1 Z: 6
+Cached Asset >>> COLLISION_TREE.005		 Type:2	Id:eacae40a-8cb7-41e7-b2b6-e82c6f076c6b | X: 33 Y: 1 Z: 9
 INFO: FILEIO: [assets/shaders/shadow.vs] Text file loaded successfully
 INFO: FILEIO: [assets/shaders/shadow.fs] Text file loaded successfully
 INFO: SHADER: [ID 4] Vertex shader compiled successfully
@@ -112,3 +109,13 @@ DEBUG: TEXTURE: Load mipmap level 0 (2048 x 2048), size: 16777216, offset: 0
 INFO: TEXTURE: [ID 3] Texture loaded successfully (2048x2048 | R8G8B8A8 | 1 mipmaps)
 INFO: TEXTURE: [ID 1] Depth renderbuffer loaded successfully (32 bits)
 INFO: FBO: [ID 1] Framebuffer object created successfully
+### InitCamera
+INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
+INFO: SHADER: [ID 3] Default shader unloaded successfully
+INFO: TEXTURE: [ID 1] Default texture unloaded successfully
+INFO: Window closed successfully
+INFO: VAO: [ID 2] Unloaded vertex array data from VRAM (GPU)
+INFO: MODEL: Unloaded model (and meshes) from RAM and VRAM
+INFO: FBO: [ID 1] Unloaded framebuffer from VRAM (GPU)
+INFO: SHADER: [ID 6] Unloaded shader program data from VRAM (GPU)
+INFO: SHADER: [ID 7] Unloaded shader program data from VRAM (GPU)
