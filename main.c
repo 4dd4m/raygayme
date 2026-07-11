@@ -5,7 +5,7 @@
 #include "raylib.h"
 
 int main(void) {
-    SetTraceLogLevel(LOG_WARNING);
+    SetTraceLogLevel(LOG_ALL);
 
     Client* client = CreateClient();
 

@@ -61,6 +61,7 @@ typedef struct World {
     Camera3D lightCamera;
     Matrix lightViewProj;
     WorldObject* worldObjects;
+    int worldObjectCount;
     int shadowLightViewProjLoc;
     int shadowLightDirLoc;
     int shadowMapLoc;

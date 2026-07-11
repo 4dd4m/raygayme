@@ -51,7 +51,7 @@ void InitWorld(World* world) {
     world->chunkCount = 1;
     world->activeChunk = chunk;
     world->activeChunk->collisionCount = 0;
-    world->worldObjects = LoadStaticAssetsForChunk(0);
+    world->worldObjects = LoadStaticAssetsForChunk(0, &world->worldObjectCount);
     // chunk->collisions = malloc(sizeof(CollisionObject) * world->activeChunk->collisionCount);
 
     // Model initialCollision = LoadModel("assets/terrain/collision.glb");
@@ -131,6 +131,11 @@ void DrawWorld(World* world) {
                           (Vector3){currentChunk.coord.x, 0.0f, currentChunk.coord.z}, 1.0f, GRAY);
             }
         }
+    }
+
+    for (int i = 0; i < world->worldObjectCount; i++) {
+        WorldObject obj = world->worldObjects[i];
+        DrawModel(*obj.model, obj.position, 1.0f, GRAY);
     }
 }
 

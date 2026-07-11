@@ -104,7 +104,7 @@ char* LoadStaticObjectFile() {
     return buffer;
 }
 
-WorldObject* LoadStaticAssetsForChunk(int chunkId) {
+WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
     char* fileContent = LoadStaticObjectFile();
     if (fileContent == NULL) {
         goto error;
@@ -212,6 +212,8 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId) {
         if (i < objectCount) {
             worldObjects[i++] = parsedObject;
         }
+
+        i = objectCount;
     }
 
     fprintf(stderr, ">>> WorldObjects parsing have been finished\n");

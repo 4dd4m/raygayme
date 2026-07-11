@@ -1,15 +1,95 @@
->>> WorldObjects parsing have been finished
+INFO: Initializing raylib 6.1-dev
+INFO: Platform backend: DESKTOP (GLFW)
+INFO: Supported raylib modules:
+INFO:     > rcore:..... loaded (mandatory)
+INFO:     > rlgl:...... loaded (mandatory)
+INFO:     > rshapes:... loaded (optional)
+INFO:     > rtextures:. loaded (optional)
+INFO:     > rtext:..... loaded (optional)
+INFO:     > rmodels:... loaded (optional)
+INFO:     > raudio:.... loaded (optional)
+INFO: DISPLAY: Device initialized successfully 
+INFO:     > Display size: 3440 x 1440
+INFO:     > Screen size:  2500 x 1200
+INFO:     > Render size:  2500 x 1200
+INFO:     > Viewport offsets: 0, 0
+INFO: GLAD: OpenGL extensions loaded successfully
+INFO: GL: Supported extensions count: 392
+INFO: GL: OpenGL device information:
+INFO:     > Vendor:   NVIDIA Corporation
+INFO:     > Renderer: NVIDIA GeForce GTX 1080/PCIe/SSE2
+INFO:     > Version:  3.3.0 NVIDIA 566.03
+INFO:     > GLSL:     3.30 NVIDIA via Cg compiler
+INFO: GL: VAO extension detected, VAO functions loaded successfully
+INFO: GL: NPOT textures extension detected, full NPOT textures supported
+INFO: GL: DXT compressed textures supported
+INFO: GL: ETC2/EAC compressed textures supported
+INFO: PLATFORM: DESKTOP (GLFW - Win32): Initialized successfully
+DEBUG: TEXTURE: Load mipmap level 0 (1 x 1), size: 4, offset: 0
+INFO: TEXTURE: [ID 1] Texture loaded successfully (1x1 | R8G8B8A8 | 1 mipmaps)
+INFO: TEXTURE: [ID 1] Default texture loaded successfully
+INFO: SHADER: [ID 1] Vertex shader compiled successfully
+INFO: SHADER: [ID 2] Fragment shader compiled successfully
+INFO: SHADER: [ID 3] Program shader loaded successfully
+INFO: SHADER: [ID 3] Default shader loaded successfully
+INFO: RLGL: Render batch vertex buffers loaded successfully in RAM (CPU)
+INFO: RLGL: Render batch vertex buffers loaded successfully in VRAM (GPU)
+INFO: RLGL: Default OpenGL state initialized successfully
+DEBUG: TEXTURE: Load mipmap level 0 (128 x 128), size: 32768, offset: 0
+INFO: TEXTURE: [ID 2] Texture loaded successfully (128x128 | GRAY_ALPHA | 1 mipmaps)
+INFO: FONT: Default font loaded successfully (224 glyphs)
+INFO: SYSTEM: Working Directory: C:\Users\Dev\raylibTest
+INFO: TIMER: Target time per frame: 6.061 milliseconds
 ### Initializing World
+INFO: FILEIO: [assets/terrain.glb] File loaded successfully
+INFO: MODEL: [assets/terrain.glb] Model basic data (glb) loaded successfully
+INFO:     > Meshes count: 1
+INFO:     > Materials count: 0 (+1 default)
+DEBUG:     > Buffers count: 1
+DEBUG:     > Images count: 0
+DEBUG:     > Textures count: 0
+DEBUG:     > Primitives (triangles only) count based on hierarchy : 1
+INFO: VAO: [ID 2] Mesh uploaded successfully to VRAM (GPU)
 !!! Static File Json has been loaded with a size of 7599
 --- Found 16 objects
+INFO: FILEIO: [assets/static_assets/ASSET_TREE.glb] File loaded successfully
+INFO: MODEL: [assets/static_assets/ASSET_TREE.glb] Model basic data (glb) loaded successfully
+INFO:     > Meshes count: 1
+INFO:     > Materials count: 2 (+1 default)
+DEBUG:     > Buffers count: 1
+DEBUG:     > Images count: 0
+DEBUG:     > Textures count: 0
+DEBUG:     > Primitives (triangles only) count based on hierarchy : 2
+INFO: VAO: [ID 3] Mesh uploaded successfully to VRAM (GPU)
+INFO: VAO: [ID 4] Mesh uploaded successfully to VRAM (GPU)
 <<< Load ModelASSET_TREE.000		 Type:0	Id:6b03349c-761e-4fec-aada-00b6c27ee63e
 Cached Asset >>> ASSET_TREE.001		 Type:0	Id:0d0151c6-e68d-4e79-aa1e-b2cbb4bb3243
 Cached Asset >>> ASSET_TREE.002		 Type:0	Id:8eae411a-0aa6-4e98-acd3-09c7966a0e66
 Cached Asset >>> ASSET_TREE.003		 Type:0	Id:a4b3ade2-fe3a-4f97-9751-1d6bf472977e
 Cached Asset >>> ASSET_TREE.004		 Type:0	Id:d337ec43-dba1-448a-aeb2-ea36e748d513
+INFO: FILEIO: [assets/static_assets/ASSET_TREE_TRUNK.glb] File loaded successfully
+INFO: MODEL: [assets/static_assets/ASSET_TREE_TRUNK.glb] Model basic data (glb) loaded successfully
+INFO:     > Meshes count: 1
+INFO:     > Materials count: 2 (+1 default)
+DEBUG:     > Buffers count: 1
+DEBUG:     > Images count: 0
+DEBUG:     > Textures count: 0
+DEBUG:     > Primitives (triangles only) count based on hierarchy : 2
+INFO: VAO: [ID 5] Mesh uploaded successfully to VRAM (GPU)
+INFO: VAO: [ID 6] Mesh uploaded successfully to VRAM (GPU)
 <<< Load ModelASSET_TREE_TRUNK.000		 Type:1	Id:3a3550d9-be25-4d4c-a0ff-c813867e0285
 Cached Asset >>> ASSET_TREE_TRUNK.001		 Type:1	Id:0b5e59ee-468d-476b-a42e-91250e134ee2
 Cached Asset >>> ASSET_TREE_TRUNK.002		 Type:1	Id:9ce92c7f-74c8-433a-ba42-fb5051a05e7c
+INFO: FILEIO: [assets/collisions/COLLISION_TREE.glb] File loaded successfully
+INFO: MODEL: [assets/collisions/COLLISION_TREE.glb] Model basic data (glb) loaded successfully
+INFO:     > Meshes count: 1
+INFO:     > Materials count: 0 (+1 default)
+DEBUG:     > Buffers count: 1
+DEBUG:     > Images count: 0
+DEBUG:     > Textures count: 0
+DEBUG:     > Primitives (triangles only) count based on hierarchy : 1
+INFO: VAO: [ID 7] Mesh uploaded successfully to VRAM (GPU)
+>>> WorldObjects parsing have been finished
 <<< Load ModelCOLLISION_TREE.002		 Type:2	Id:284c3824-fe5d-45ac-908d-d287b0789e03
 Cached Asset >>> COLLISION_TREE.001		 Type:2	Id:5e74a717-b90d-4b7d-a8bd-2b2ba1aa1344
 Cached Asset >>> COLLISION_TREE.003		 Type:2	Id:3c5df6e1-9db5-45ff-8ddb-d5c72862364d
@@ -18,4 +98,17 @@ Cached Asset >>> COLLISION_TREE.005		 Type:2	Id:8ebc7aa1-ac24-4bd0-abee-2c8a6fda
 Cached Asset >>> COLLISION_TREE.006		 Type:2	Id:624a1a59-8be4-465b-9915-7604279c0e37
 Cached Asset >>> COLLISION_TREE.007		 Type:2	Id:54f7a46c-1515-46e3-bcc9-bf917f165eaf
 Cached Asset >>> COLLISION_TREE.008		 Type:2	Id:61ae970f-daed-4120-a023-aefee93bae73
-### InitCamera
+INFO: FILEIO: [assets/shaders/shadow.vs] Text file loaded successfully
+INFO: FILEIO: [assets/shaders/shadow.fs] Text file loaded successfully
+INFO: SHADER: [ID 4] Vertex shader compiled successfully
+INFO: SHADER: [ID 5] Fragment shader compiled successfully
+INFO: SHADER: [ID 6] Program shader loaded successfully
+INFO: FILEIO: [assets/shaders/shadow_depth.vs] Text file loaded successfully
+INFO: FILEIO: [assets/shaders/shadow_depth.fs] Text file loaded successfully
+INFO: SHADER: [ID 4] Vertex shader compiled successfully
+INFO: SHADER: [ID 5] Fragment shader compiled successfully
+INFO: SHADER: [ID 7] Program shader loaded successfully
+DEBUG: TEXTURE: Load mipmap level 0 (2048 x 2048), size: 16777216, offset: 0
+INFO: TEXTURE: [ID 3] Texture loaded successfully (2048x2048 | R8G8B8A8 | 1 mipmaps)
+INFO: TEXTURE: [ID 1] Depth renderbuffer loaded successfully (32 bits)
+INFO: FBO: [ID 1] Framebuffer object created successfully
