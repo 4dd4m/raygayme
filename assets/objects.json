@@ -1,6 +1,23 @@
 {
     "objects": [
         {
+            "id": "1ea51132-645d-45e9-b720-8215f9fb8e62",
+            "interactive": true,
+            "name": "Rock",
+            "type": "ASSET_ROCK",
+            "chunk": 0,
+            "position": [
+                35.0,
+                0.0,
+                27.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                -0.0
+            ]
+        },
+        {
             "id": "6b03349c-761e-4fec-aada-00b6c27ee63e",
             "interactive": true,
             "name": "ASSET_TREE.000|0",
@@ -13,8 +30,8 @@
             ],
             "rotation": [
                 0.0,
-                0.0,
-                -0.0
+                9.340887069702148,
+                0.0
             ]
         },
         {
@@ -30,8 +47,8 @@
             ],
             "rotation": [
                 0.0,
-                0.0,
-                -0.0
+                -2.3610007762908936,
+                0.0
             ]
         },
         {

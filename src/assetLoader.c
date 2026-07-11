@@ -12,9 +12,13 @@
 
 Asset Assets[ASSET_COUNT] = {0};
 
-char* AssetPath[ASSET_COUNT] = {"assets/chunks/TERRAIN.glb", "assets/assets/ASSET_TREE.glb",
-                                "assets/assets/ASSET_TREE_TRUNK.glb",
-                                "assets/collisions/COLLISION_TREE.glb"};
+char* AssetPath[ASSET_COUNT] = {
+    "assets/chunks/TERRAIN.glb",
+    "assets/assets/ASSET_TREE.glb",
+    "assets/assets/ASSET_TREE_TRUNK.glb",
+    "assets/assets/ASSET_ROCK.glb",
+    "assets/collisions/COLLISION_TREE.glb",
+};
 
 Asset* GetAsset(AssetId id) {
     if (Assets[id].isLoaded) {
@@ -64,6 +68,10 @@ static AssetId GetAssetIdFromString(const char* id, const char* type) {
 
     if (strcmp(type, "COLLISION_TREE") == 0) {
         return COLLISION_TREE;
+    }
+
+    if (strcmp(type, "ASSET_ROCK") == 0) {
+        return ASSET_ROCK;
     }
 
     fprintf(stderr, "Object %s has invalid type registered in GetAssetIdFromString()\n",

@@ -1,6 +1,13 @@
 #pragma once
 
-typedef enum AssetId { TERRAIN, ASSET_TREE, ASSET_TREE_TRUNK, COLLISION_TREE, ASSET_COUNT } AssetId;
+typedef enum AssetId {
+    TERRAIN,
+    ASSET_TREE,
+    ASSET_TREE_TRUNK,
+    ASSET_ROCK,
+    COLLISION_TREE,
+    ASSET_COUNT
+} AssetId;
 
 typedef struct Asset Asset;
 typedef struct WorldObject WorldObject;

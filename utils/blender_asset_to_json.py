@@ -16,7 +16,7 @@ for obj in bpy.context.scene.objects:
     if obj.get("blenderOnly") is None:
         raise TypeError("f{obj.name} has no blenderOnly property")
         
-    if obj.get("blenderOnly") == True:
+    if obj.get("blenderOnly") == True or obj.name == "Chunk_0_0":
         continue
 
   
