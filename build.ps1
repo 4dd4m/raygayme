@@ -65,9 +65,11 @@ if ($LASTEXITCODE -ne 0) {
 $ctags = Get-Command ctags -ErrorAction SilentlyContinue
 if ($ctags) {
     & $ctags.Source -R --languages=C --exclude=build --exclude=lib .
-} else {
+}
+else {
     Write-Host "ctags not found; skipping tag generation"
 }
 
 # Run and save output to log.txt
-cmd /c ".\game.exe 2>&1" | Tee-Object -FilePath "log.txt"
+#cmd /c ".\game.exe 2>&1" | Tee-Object -FilePath "log.txt"
+cmd /c ".\game.exe"
