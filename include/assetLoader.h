@@ -1,6 +1,6 @@
 #pragma once
 
-typedef enum AssetId { ASSET_TREE, ASSET_TREE_TRUNK, ASSET_COUNT } AssetId;
+typedef enum AssetId { ASSET_TREE, ASSET_TREE_TRUNK, COLLISION, ASSET_COUNT } AssetId;
 
 typedef struct Asset Asset;
 typedef struct WorldObject WorldObject;
@@ -11,3 +11,4 @@ void UnloadAllAssets();
 void LoadStaticAssetsForChunk(int chunkId);
 
 char* LoadStaticObjectFile();
+static AssetId GetAssetIdFromString(const char* id, const char* type);
