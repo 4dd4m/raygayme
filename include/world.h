@@ -12,6 +12,7 @@ typedef struct WorldObject {
     Vector3 rotation;
     Model* model;
     BoundingBox boundingBox;
+    bool isMouseOver;
 } WorldObject;
 
 #define MAX_CHUNKS 256
@@ -58,6 +59,7 @@ typedef struct World {
     char* worldName;
     Shader shadowShader;
     Shader shadowDepthShader;
+    Shader outlineShader;
     RenderTexture2D shadowMap;
     Vector3 lightDir;
     Camera3D lightCamera;
@@ -67,6 +69,8 @@ typedef struct World {
     int shadowLightViewProjLoc;
     int shadowLightDirLoc;
     int shadowMapLoc;
+    int outlineColorLoc;
+    int outlineSizeLoc;
 } World;
 
 void InitWorld(World* world);
@@ -74,3 +78,4 @@ void UpdateWorld(World* world);
 void DrawWorld(World* world);
 void RenderWorldShadowMap(World* world);
 void ShutdownWorld(World* world);
+

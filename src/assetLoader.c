@@ -215,7 +215,8 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
                                                  .position = position,
                                                  .rotation = rotation,
                                                  .model = model,
-                                                 .boundingBox = box};
+                                                 .boundingBox = box,
+                                                 .isMouseOver = true};
 
         fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n", parsedObject.name,
                 parsedObject.type, parsedObject.id, parsedObject.position.x, parsedObject.position.y,

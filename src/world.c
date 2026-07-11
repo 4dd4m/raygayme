@@ -6,7 +6,7 @@
 
 #include "assetLoader.h"
 #include "raymath.h"
-
+#include "rlgl.h"
 #define SHADOWMAP_SIZE 2048
 #define LIGHT_DISTANCE 25.0f
 #define LIGHT_ORTHO_SIZE 20.0f
@@ -67,6 +67,21 @@ void InitWorld(World* world) {
     world->shadowShader = LoadShader("assets/shaders/shadow.vs", "assets/shaders/shadow.fs");
     world->shadowDepthShader =
         LoadShader("assets/shaders/shadow_depth.vs", "assets/shaders/shadow_depth.fs");
+
+    // outline shader
+    world->outlineShader = LoadShader("assets/shaders/outline.vs", "assets/shaders/outline.fs");
+    world->outlineShader.locs[SHADER_LOC_MATRIX_MVP] =
+        GetShaderLocation(world->outlineShader, "mvp");
+    world->outlineColorLoc = GetShaderLocation(world->outlineShader, "outlineColor");
+    world->outlineSizeLoc = GetShaderLocation(world->outlineShader, "outlineSize");
+
+    // emerald green
+    Vector4 outlineColor = {31.0f / 255.0f, 206.0f / 255.0f, 109.0f / 255.0f, 1.0f};
+
+    // shader layer above the hull
+    float outlineSize = 0.05f;
+    SetShaderValue(world->outlineShader, world->outlineColorLoc, &outlineColor, SHADER_UNIFORM_VEC4);
+    SetShaderValue(world->outlineShader, world->outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
 
     world->shadowShader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(world->shadowShader, "mvp");
     world->shadowShader.locs[SHADER_LOC_MATRIX_MODEL] =
@@ -163,7 +178,17 @@ void DrawWorld(World* world) {
                 DrawBoundingBox(obj.boundingBox, RED);
                 break;
             default:
-                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                if (obj.isMouseOver) {
+                    rlEnableBackfaceCulling();
+                    rlSetCullFace(RL_CULL_FACE_FRONT);
+                    SetModelShader(obj.model, world->outlineShader);
+                    DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                    rlSetCullFace(RL_CULL_FACE_BACK);
+                    SetModelShader(obj.model, world->shadowShader);
+                    DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                } else {
+                    DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                }
                 break;
         }
     }
@@ -193,6 +218,9 @@ void ShutdownWorld(World* world) {
     }
     if (world->shadowDepthShader.id != 0) {
         UnloadShader(world->shadowDepthShader);
+    }
+    if (world->outlineShader.id != 0) {
+        UnloadShader(world->outlineShader);
     }
 
     free(world->worldObjects);
