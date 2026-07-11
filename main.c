@@ -2,10 +2,7 @@
 
 #include "cJSON.h"
 #include "client.h"
-#include "debug.h"
 #include "raylib.h"
-
-DebugConfig debug = {0};
 
 int main(void) {
     Client* client = CreateClient();

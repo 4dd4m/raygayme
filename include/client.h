@@ -7,23 +7,13 @@
 #define MAX_OBJECTS 1000
 #define MAX_COLLISIONS 1000
 
-typedef struct RenderConfig {
-    int width;
-    int height;
-    const char* title;
-    int targetFps;
-} RenderConfig;
-
-typedef struct Terrain {
-    Model model;
-} Terrain;
+typedef struct RenderConfig RenderConfig;
 
 typedef struct Client {
     World world;
     Player player;
     MyCamera Camera;
-
-    RenderConfig renderConfig;
+    RenderConfig* renderConfig;
 } Client;
 
 Client* CreateClient(void);

@@ -2,6 +2,13 @@
 
 #include <stdlib.h>
 
+typedef struct RenderConfig {
+    int width;
+    int height;
+    const char* title;
+    int targetFps;
+} RenderConfig;
+
 Client* CreateClient(void) {
     Client* client = malloc(sizeof(*client));
     if (client == NULL) {
@@ -13,13 +20,17 @@ Client* CreateClient(void) {
 }
 
 void InitClient(Client* client) {
-    client->renderConfig.width = 2500;
-    client->renderConfig.height = 900;
-    client->renderConfig.targetFps = 165;
-    client->renderConfig.title = "My Favourite game";
+    client->renderConfig = malloc(sizeof(RenderConfig));
+    if (client->renderConfig == NULL) {
+        return;
+    }
 
-    InitWindow(client->renderConfig.width, client->renderConfig.height, client->renderConfig.title);
-    SetTargetFPS(client->renderConfig.targetFps);
+    *client->renderConfig =
+        (RenderConfig){.width = 2500, .height = 1200, .targetFps = 165, .title = "My FavGame"};
+
+    InitWindow(client->renderConfig->width, client->renderConfig->height,
+               client->renderConfig->title);
+    SetTargetFPS(client->renderConfig->targetFps);
 
     InitPlayer(&client->player);
     InitWorld(&client->world);
@@ -31,5 +42,6 @@ void DestroyClient(Client* client) {
         return;
     }
 
+    free(client->renderConfig);
     free(client);
 }

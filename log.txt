@@ -10,8 +10,8 @@ INFO:     > rmodels:... loaded (optional)
 INFO:     > raudio:.... loaded (optional)
 INFO: DISPLAY: Device initialized successfully 
 INFO:     > Display size: 3440 x 1440
-INFO:     > Screen size:  2500 x 900
-INFO:     > Render size:  2500 x 900
+INFO:     > Screen size:  2500 x 1200
+INFO:     > Render size:  2500 x 1200
 INFO:     > Viewport offsets: 0, 0
 INFO: GLAD: OpenGL extensions loaded successfully
 INFO: GL: Supported extensions count: 392
