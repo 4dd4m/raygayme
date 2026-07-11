@@ -1,5 +1,17 @@
 #pragma once
+#include "assetLoader.h"
 #include "raylib.h"
+
+typedef struct WorldObject {
+    char* id;
+    bool interactive;
+    char* name;
+    AssetId type;
+    int chunk;
+    Vector3 position;
+    Vector3 rotation;
+    Model* model;
+} WorldObject;
 
 #define MAX_CHUNKS 256
 
@@ -14,14 +26,6 @@ typedef struct ChunkCoord {
     int x;
     int z;
 } ChunkCoord;
-
-typedef struct WorldObject {
-    EntityId id;
-    Asset* asset;
-    Vector3 position;
-    float rotation;
-    Vector3 scale;
-} WorldObject;
 
 typedef struct CollisionObject {
     Mesh mesh;

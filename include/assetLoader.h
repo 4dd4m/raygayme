@@ -1,7 +1,9 @@
 #pragma once
-#include "world.h"
 
 typedef enum AssetId { ASSET_TREE, ASSET_TREE_TRUNK, ASSET_COUNT } AssetId;
+
+typedef struct Asset Asset;
+typedef struct WorldObject WorldObject;
 
 Asset* GetAsset(AssetId id);
 void UnloadAsset(AssetId id);

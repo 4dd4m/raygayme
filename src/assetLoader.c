@@ -37,7 +37,7 @@ void UnloadAllAssets() {
 }
 
 char* LoadStaticObjectFile() {
-    FILE* file = fopen("assets/terrain/objects.json", "r");
+    FILE* file = fopen("assets/objects.json", "r");
 
     if (!file) {
         perror("Error opening static objects file");
@@ -75,8 +75,86 @@ char* LoadStaticObjectFile() {
 }
 
 void LoadStaticAssetsForChunk(int chunkId) {
-    // char* fileContent = LoadStaticObjectFile();
-    // cJSON* json = cJSON_Parse(fileContent);
-    // free(fileContent);
-    // free(json);
+    char* fileContent = LoadStaticObjectFile();
+    cJSON* json = cJSON_Parse(fileContent);
+    if (json == NULL) {
+        fprintf(stderr, "Objects file cannot be parsed\n");
+        goto error;
+    }
+
+    const cJSON* objects = NULL;
+    const cJSON* object = NULL;
+    const cJSON* positions = NULL;
+    Vector3 position = {0};
+    const cJSON* rotations = NULL;
+    Vector3 rotation = {0};
+
+    objects = cJSON_GetObjectItemCaseSensitive(json, "objects");
+
+    WorldObject* worldObjects = malloc(cJSON_GetArraySize(objects) * sizeof(WorldObject));
+    if (worldObjects == NULL) {
+        goto error;
+    }
+
+    printf(">>> Found %d objects\n", cJSON_GetArraySize(objects));
+
+    cJSON_ArrayForEach(object, objects) {
+        cJSON* id = cJSON_GetObjectItemCaseSensitive(object, "id");
+        cJSON* interactive = cJSON_GetObjectItemCaseSensitive(object, "interactive");
+        cJSON* name = cJSON_GetObjectItemCaseSensitive(object, "name");
+        cJSON* type = cJSON_GetObjectItemCaseSensitive(object, "type");
+        cJSON* chunk = cJSON_GetObjectItemCaseSensitive(object, "chunk");
+
+        positions = cJSON_GetObjectItemCaseSensitive(object, "position");
+
+        if (cJSON_IsArray(positions) && cJSON_GetArraySize(positions) == 3) {
+            position = (Vector3){
+                .x = (float)cJSON_GetArrayItem(positions, 0)->valuedouble,
+                .y = (float)cJSON_GetArrayItem(positions, 1)->valuedouble,
+                .z = (float)cJSON_GetArrayItem(positions, 2)->valuedouble,
+            };
+        } else {
+            goto error;
+        }
+
+        rotations = cJSON_GetObjectItemCaseSensitive(object, "rotation");
+
+        if (cJSON_IsArray(rotations) && cJSON_GetArraySize(rotations) == 3) {
+            rotation = (Vector3){
+                .x = (float)cJSON_GetArrayItem(rotations, 0)->valuedouble,
+                .y = (float)cJSON_GetArrayItem(rotations, 1)->valuedouble,
+                .z = (float)cJSON_GetArrayItem(rotations, 2)->valuedouble,
+            };
+        } else {
+            goto error;
+        }
+
+        WorldObject parsedObject =
+            (WorldObject){.id = id->valuestring,
+                          .interactive = interactive->valuestring == "true" ? true : false,
+                          .name = name->valuestring,
+                          .type = (AssetId)type->valuestring,
+                          .chunk = chunk->valueint,
+                          .position = position,
+                          .rotation = rotation,
+                          .model = &(GetAsset((AssetId)type->valueint)->model)};
+
+        fprintf(stdout, ">>> Asset loaded:%s\t\t Type:%d\n", parsedObject.name,
+                (AssetId)type->valueint);
+    }
+
+    fprintf(stderr, ">>> WorldObjects parsing have been finished\n");
+    goto end;
+
+error:
+    fprintf(stderr, "Error while Parsing Objects.json\n");
+    free(fileContent);
+    free(json);
+    free(worldObjects);
+
+end:
+    free(fileContent);
+    free(json);
+    // to remove
+    free(worldObjects);
 }
