@@ -139,8 +139,8 @@
         {
             "id": "284c3824-fe5d-45ac-908d-d287b0789e03",
             "interactive": false,
-            "name": "COLLISION.002",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.002",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 36.37151336669922,
@@ -156,8 +156,8 @@
         {
             "id": "5e74a717-b90d-4b7d-a8bd-2b2ba1aa1344",
             "interactive": false,
-            "name": "COLLISION.001",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.001",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 32.37151336669922,
@@ -173,8 +173,8 @@
         {
             "id": "3c5df6e1-9db5-45ff-8ddb-d5c72862364d",
             "interactive": false,
-            "name": "COLLISION.003",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.003",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 27.37151336669922,
@@ -190,8 +190,8 @@
         {
             "id": "e90ab8c1-bf02-4bb1-9661-aef073b2bc4c",
             "interactive": false,
-            "name": "COLLISION.004",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.004",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 24.37151336669922,
@@ -207,8 +207,8 @@
         {
             "id": "8ebc7aa1-ac24-4bd0-abee-2c8a6fdab329",
             "interactive": false,
-            "name": "COLLISION.005",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.005",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 22.071514129638672,
@@ -224,8 +224,8 @@
         {
             "id": "624a1a59-8be4-465b-9915-7604279c0e37",
             "interactive": false,
-            "name": "COLLISION.006",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.006",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 21.271514892578125,
@@ -241,8 +241,8 @@
         {
             "id": "54f7a46c-1515-46e3-bcc9-bf917f165eaf",
             "interactive": false,
-            "name": "COLLISION.007",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.007",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 29.271514892578125,
@@ -258,8 +258,8 @@
         {
             "id": "61ae970f-daed-4120-a023-aefee93bae73",
             "interactive": false,
-            "name": "COLLISION.008",
-            "type": "COLLISION",
+            "name": "COLLISION_TREE.008",
+            "type": "COLLISION_TREE",
             "chunk": "0",
             "position": [
                 31.271514892578125,

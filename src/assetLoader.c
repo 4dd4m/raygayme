@@ -11,14 +11,19 @@
 Asset Assets[ASSET_COUNT] = {0};
 
 char* AssetPath[ASSET_COUNT] = {"assets/static_assets/ASSET_TREE.glb",
-                                "assets/static_assets/ASSET_TREE_TRUNK.glb"};
+                                "assets/static_assets/ASSET_TREE_TRUNK.glb",
+                                "assets/collisions/COLLISION_TREE.glb"};
 
 Asset* GetAsset(AssetId id) {
-    if (Assets[id].isLoaded) return &Assets[id];
+    if (Assets[id].isLoaded) {
+        printf("Cached Asset");
+        return &Assets[id];
+    }
 
     Assets[id].model = LoadModel(AssetPath[id]);
     Assets[id].isLoaded = true;
 
+    printf("Load Model");
     return &Assets[id];
 }
 
@@ -35,6 +40,28 @@ void UnloadAllAssets() {
             UnloadAsset((AssetId)i);
         }
     }
+}
+
+static AssetId GetAssetIdFromString(const char* id, const char* type) {
+    if (type == NULL) {
+        fprintf(stderr, "Object %s has invalid Type: %s", id, type);
+        exit(1);
+    }
+
+    if (strcmp(type, "ASSET_TREE") == 0) {
+        return ASSET_TREE;
+    }
+
+    if (strcmp(type, "ASSET_TREE_TRUNK") == 0) {
+        return ASSET_TREE_TRUNK;
+    }
+
+    if (strcmp(type, "COLLISION_TREE") == 0) {
+        return COLLISION_TREE;
+    }
+
+    fprintf(stderr, "Object %s has valid type registered in GetAssetIdFromString()", id);
+    exit(1);
 }
 
 char* LoadStaticObjectFile() {
@@ -130,15 +157,17 @@ void LoadStaticAssetsForChunk(int chunkId) {
             goto error;
         }
 
+        AssetId assetId = GetAssetIdFromString(id->valuestring, type->valuestring);
+        Model* model = &(GetAsset(assetId)->model);
+
         WorldObject parsedObject = (WorldObject){
             .id = id->valuestring,
             .interactive = strcmp(interactive->valuestring, "true") == 0 ? true : false,
             .name = name->valuestring,
-            .type = GetAssetIdFromString(id->valuestring, type->valuestring),
+            .type = assetId,
             .chunk = chunk->valueint,
             .position = position,
-            .rotation = rotation,
-            .model = &(GetAsset((AssetId)type->valueint)->model)};
+            .rotation = rotation};  // causing error
 
         fprintf(stdout, ">>> Asset loaded:%s\t\t Type:%d\tId:%s\n", parsedObject.name,
                 parsedObject.type, parsedObject.id);
@@ -158,26 +187,4 @@ end:
     free(json);
     // to remove
     free(worldObjects);
-}
-
-static AssetId GetAssetIdFromString(const char* id, const char* type) {
-    if (type == NULL) {
-        fprintf(stderr, "Object %s has invalid Type", id);
-        exit(1);
-    }
-
-    if (strcmp(type, "ASSET_TREE") == 0) {
-        return ASSET_TREE;
-    }
-
-    if (strcmp(type, "ASSET_TREE_TRUNK") == 0) {
-        return ASSET_TREE_TRUNK;
-    }
-
-    if (strcmp(type, "COLLISION") == 0) {
-        return COLLISION;
-    }
-
-    fprintf(stderr, "Object %s has valid type registered in GetAssetIdFromString()", id);
-    exit(1);
 }
