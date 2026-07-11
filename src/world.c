@@ -47,19 +47,11 @@ void InitWorld(World* world) {
     chunk->collisionCount = 0;
     chunk->isActive = true;
 
-    chunk->model = LoadModel("assets/terrain.glb");
+    chunk->model = LoadModel("assets/chunks/TERRAIN.glb");
     world->chunkCount = 1;
     world->activeChunk = chunk;
     world->activeChunk->collisionCount = 0;
     world->worldObjects = LoadStaticAssetsForChunk(0, &world->worldObjectCount);
-    // chunk->collisions = malloc(sizeof(CollisionObject) * world->activeChunk->collisionCount);
-
-    // Model initialCollision = LoadModel("assets/terrain/collision.glb");
-
-    // chunk->collisions[0] =
-    //     (CollisionObject){initialCollision.meshes[0],
-    //     GetMeshBoundingBox(initialCollision.meshes[0]),
-    //                       initialCollision.transform};
 
     // SET Shaders
 

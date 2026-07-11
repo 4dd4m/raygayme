@@ -12,8 +12,8 @@
 
 Asset Assets[ASSET_COUNT] = {0};
 
-char* AssetPath[ASSET_COUNT] = {"assets/static_assets/ASSET_TREE.glb",
-                                "assets/static_assets/ASSET_TREE_TRUNK.glb",
+char* AssetPath[ASSET_COUNT] = {"assets/chunks/TERRAIN.glb", "assets/assets/ASSET_TREE.glb",
+                                "assets/assets/ASSET_TREE_TRUNK.glb",
                                 "assets/collisions/COLLISION_TREE.glb"};
 
 Asset* GetAsset(AssetId id) {
@@ -48,6 +48,10 @@ static AssetId GetAssetIdFromString(const char* id, const char* type) {
     if (type == NULL) {
         fprintf(stderr, "Object %s has invalid Type: %s\n", id ? id : "(null)", type);
         return ASSET_COUNT;
+    }
+
+    if (strcmp(type, "TERRAIN") == 0) {
+        return TERRAIN;
     }
 
     if (strcmp(type, "ASSET_TREE") == 0) {

@@ -3,9 +3,9 @@
         {
             "id": "6b03349c-761e-4fec-aada-00b6c27ee63e",
             "interactive": true,
-            "name": "ASSET_TREE.000",
+            "name": "ASSET_TREE.000|0",
             "type": "ASSET_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 22.087377548217773,
                 0.00013840198516845703,
@@ -20,9 +20,9 @@
         {
             "id": "0d0151c6-e68d-4e79-aa1e-b2cbb4bb3243",
             "interactive": true,
-            "name": "ASSET_TREE.001",
+            "name": "ASSET_TREE.001|0",
             "type": "ASSET_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 32.36622619628906,
                 0.00013840198516845703,
@@ -35,11 +35,28 @@
             ]
         },
         {
+            "id": "3a3550d9-be25-4d4c-a0ff-c813867e0285",
+            "interactive": false,
+            "name": "ASSET_TREE_TRUNK.000|0",
+            "type": "ASSET_TREE_TRUNK",
+            "chunk": 0,
+            "position": [
+                21.252460479736328,
+                0.0,
+                2.9675025939941406
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                -0.0
+            ]
+        },
+        {
             "id": "8eae411a-0aa6-4e98-acd3-09c7966a0e66",
             "interactive": true,
-            "name": "ASSET_TREE.002",
+            "name": "ASSET_TREE.002|0",
             "type": "ASSET_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 27.322351455688477,
                 -0.04516029357910156,
@@ -54,9 +71,9 @@
         {
             "id": "a4b3ade2-fe3a-4f97-9751-1d6bf472977e",
             "interactive": true,
-            "name": "ASSET_TREE.003",
+            "name": "ASSET_TREE.003|0",
             "type": "ASSET_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 36.322349548339844,
                 -0.04516029357910156,
@@ -71,9 +88,9 @@
         {
             "id": "d337ec43-dba1-448a-aeb2-ea36e748d513",
             "interactive": true,
-            "name": "ASSET_TREE.004",
+            "name": "ASSET_TREE.004|0",
             "type": "ASSET_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 24.322349548339844,
                 -0.04516029357910156,
@@ -86,28 +103,11 @@
             ]
         },
         {
-            "id": "3a3550d9-be25-4d4c-a0ff-c813867e0285",
-            "interactive": false,
-            "name": "ASSET_TREE_TRUNK.000",
-            "type": "ASSET_TREE_TRUNK",
-            "chunk": "0",
-            "position": [
-                21.252460479736328,
-                0.0,
-                2.9675025939941406
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                -0.0
-            ]
-        },
-        {
             "id": "0b5e59ee-468d-476b-a42e-91250e134ee2",
             "interactive": false,
-            "name": "ASSET_TREE_TRUNK.001",
+            "name": "ASSET_TREE_TRUNK.001|0",
             "type": "ASSET_TREE_TRUNK",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 31.252460479736328,
                 0.0,
@@ -122,9 +122,9 @@
         {
             "id": "9ce92c7f-74c8-433a-ba42-fb5051a05e7c",
             "interactive": false,
-            "name": "ASSET_TREE_TRUNK.002",
+            "name": "ASSET_TREE_TRUNK.002|0",
             "type": "ASSET_TREE_TRUNK",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 29.252460479736328,
                 0.0,
@@ -139,9 +139,9 @@
         {
             "id": "16cc0f59-ff8c-47f9-aa49-f611d3635de5",
             "interactive": false,
-            "name": "COLLISION_TREE.001",
+            "name": "COLLISION_TREE.001|0",
             "type": "COLLISION_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 22.0,
                 1.0,
@@ -156,9 +156,9 @@
         {
             "id": "50300234-7cd2-4e42-81f6-6d30702f2e69",
             "interactive": false,
-            "name": "COLLISION_TREE.002",
+            "name": "COLLISION_TREE.002|0",
             "type": "COLLISION_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 24.0,
                 1.0,
@@ -173,9 +173,9 @@
         {
             "id": "d6567f44-2bd4-40a2-ba0e-dbdcedd5b73b",
             "interactive": false,
-            "name": "COLLISION_TREE.003",
+            "name": "COLLISION_TREE.003|0",
             "type": "COLLISION_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 36.0,
                 1.0,
@@ -190,9 +190,9 @@
         {
             "id": "64bc93b3-714c-459a-8b6b-531b9debad21",
             "interactive": false,
-            "name": "COLLISION_TREE.004",
+            "name": "COLLISION_TREE.004|0",
             "type": "COLLISION_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 28.0,
                 1.0,
@@ -207,9 +207,9 @@
         {
             "id": "eacae40a-8cb7-41e7-b2b6-e82c6f076c6b",
             "interactive": false,
-            "name": "COLLISION_TREE.005",
+            "name": "COLLISION_TREE.005|0",
             "type": "COLLISION_TREE",
-            "chunk": "0",
+            "chunk": 0,
             "position": [
                 33.0,
                 1.0,
