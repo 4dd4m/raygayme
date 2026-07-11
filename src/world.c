@@ -51,7 +51,7 @@ void InitWorld(World* world) {
     world->chunkCount = 1;
     world->activeChunk = chunk;
     world->activeChunk->collisionCount = 0;
-    LoadStaticAssetsForChunk(0);
+    world->worldObjects = LoadStaticAssetsForChunk(0);
     // chunk->collisions = malloc(sizeof(CollisionObject) * world->activeChunk->collisionCount);
 
     // Model initialCollision = LoadModel("assets/terrain/collision.glb");
@@ -158,4 +158,6 @@ void ShutdownWorld(World* world) {
     if (world->shadowDepthShader.id != 0) {
         UnloadShader(world->shadowDepthShader);
     }
+
+    free(world->worldObjects);
 }

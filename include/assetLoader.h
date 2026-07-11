@@ -8,7 +8,6 @@ typedef struct WorldObject WorldObject;
 Asset* GetAsset(AssetId id);
 void UnloadAsset(AssetId id);
 void UnloadAllAssets();
-void LoadStaticAssetsForChunk(int chunkId);
+WorldObject* LoadStaticAssetsForChunk(int chunkId);
 
 char* LoadStaticObjectFile();
-static AssetId GetAssetIdFromString(const char* id, const char* type);

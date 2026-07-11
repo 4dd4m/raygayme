@@ -6,6 +6,7 @@
 #include <string.h>
 #include <world.h>
 
+#include "assetLoader.h"
 #include "cJSON.h"
 
 Asset Assets[ASSET_COUNT] = {0};
@@ -16,14 +17,14 @@ char* AssetPath[ASSET_COUNT] = {"assets/static_assets/ASSET_TREE.glb",
 
 Asset* GetAsset(AssetId id) {
     if (Assets[id].isLoaded) {
-        printf("Cached Asset");
+        printf("Cached Asset >>> ");
         return &Assets[id];
     }
 
     Assets[id].model = LoadModel(AssetPath[id]);
     Assets[id].isLoaded = true;
 
-    printf("Load Model");
+    printf("<<< Load Model");
     return &Assets[id];
 }
 
@@ -44,8 +45,8 @@ void UnloadAllAssets() {
 
 static AssetId GetAssetIdFromString(const char* id, const char* type) {
     if (type == NULL) {
-        fprintf(stderr, "Object %s has invalid Type: %s", id, type);
-        exit(1);
+        fprintf(stderr, "Object %s has invalid Type: %s\n", id ? id : "(null)", type);
+        return ASSET_COUNT;
     }
 
     if (strcmp(type, "ASSET_TREE") == 0) {
@@ -60,8 +61,9 @@ static AssetId GetAssetIdFromString(const char* id, const char* type) {
         return COLLISION_TREE;
     }
 
-    fprintf(stderr, "Object %s has valid type registered in GetAssetIdFromString()", id);
-    exit(1);
+    fprintf(stderr, "Object %s has invalid type registered in GetAssetIdFromString()\n",
+            id ? id : "(null)");
+    return ASSET_COUNT;
 }
 
 char* LoadStaticObjectFile() {
@@ -95,15 +97,18 @@ char* LoadStaticObjectFile() {
     size_t read_size = fread(buffer, 1, length, file);
     buffer[read_size] = '\0';
 
-    printf(">>> Static File Json hasbeen loaded with a size of %lld\n", read_size);
+    printf("!!! Static File Json has been loaded with a size of %lld\n", read_size);
 
     fclose(file);
 
     return buffer;
 }
 
-void LoadStaticAssetsForChunk(int chunkId) {
+WorldObject* LoadStaticAssetsForChunk(int chunkId) {
     char* fileContent = LoadStaticObjectFile();
+    if (fileContent == NULL) {
+        goto error;
+    }
     cJSON* json = cJSON_Parse(fileContent);
     if (json == NULL) {
         fprintf(stderr, "Objects file cannot be parsed\n");
@@ -118,20 +123,29 @@ void LoadStaticAssetsForChunk(int chunkId) {
     Vector3 rotation = {0};
 
     objects = cJSON_GetObjectItemCaseSensitive(json, "objects");
+    if (!cJSON_IsArray(objects)) {
+        fprintf(stderr, "Objects file does not contain a valid objects array\n");
+        goto error;
+    }
 
-    WorldObject* worldObjects = malloc(cJSON_GetArraySize(objects) * sizeof(WorldObject));
+    int objectCount = cJSON_GetArraySize(objects);
+    WorldObject* worldObjects =
+        malloc((objectCount > 0 ? (size_t)objectCount : 1u) * sizeof(WorldObject));
     if (worldObjects == NULL) {
         goto error;
     }
 
-    printf(">>> Found %d objects\n", cJSON_GetArraySize(objects));
+    printf("--- Found %d objects\n", objectCount);
 
+    int i = 0;
     cJSON_ArrayForEach(object, objects) {
         cJSON* id = cJSON_GetObjectItemCaseSensitive(object, "id");
         cJSON* interactive = cJSON_GetObjectItemCaseSensitive(object, "interactive");
         cJSON* name = cJSON_GetObjectItemCaseSensitive(object, "name");
         cJSON* type = cJSON_GetObjectItemCaseSensitive(object, "type");
         cJSON* chunk = cJSON_GetObjectItemCaseSensitive(object, "chunk");
+        bool isInteractive = false;
+        int parsedChunk = 0;
 
         positions = cJSON_GetObjectItemCaseSensitive(object, "position");
 
@@ -157,20 +171,47 @@ void LoadStaticAssetsForChunk(int chunkId) {
             goto error;
         }
 
+        if (!cJSON_IsString(id) || !cJSON_IsString(name) || !cJSON_IsString(type)) {
+            goto error;
+        }
+
+        if (cJSON_IsTrue(interactive)) {
+            isInteractive = true;
+        } else if (cJSON_IsFalse(interactive)) {
+            isInteractive = false;
+        } else if (cJSON_IsString(interactive) && interactive->valuestring != NULL) {
+            isInteractive = strcmp(interactive->valuestring, "true") == 0;
+        }
+
+        if (cJSON_IsNumber(chunk)) {
+            parsedChunk = chunk->valueint;
+        } else if (cJSON_IsString(chunk) && chunk->valuestring != NULL) {
+            parsedChunk = atoi(chunk->valuestring);
+        } else {
+            goto error;
+        }
+
         AssetId assetId = GetAssetIdFromString(id->valuestring, type->valuestring);
+        if (assetId < 0 || assetId >= ASSET_COUNT) {
+            goto error;
+        }
         Model* model = &(GetAsset(assetId)->model);
 
-        WorldObject parsedObject = (WorldObject){
-            .id = id->valuestring,
-            .interactive = strcmp(interactive->valuestring, "true") == 0 ? true : false,
-            .name = name->valuestring,
-            .type = assetId,
-            .chunk = chunk->valueint,
-            .position = position,
-            .rotation = rotation};  // causing error
+        WorldObject parsedObject = (WorldObject){.id = strdup(id->valuestring),
+                                                 .interactive = isInteractive,
+                                                 .name = strdup(name->valuestring),
+                                                 .type = assetId,
+                                                 .chunk = parsedChunk,
+                                                 .position = position,
+                                                 .rotation = rotation,
+                                                 .model = model};
 
-        fprintf(stdout, ">>> Asset loaded:%s\t\t Type:%d\tId:%s\n", parsedObject.name,
-                parsedObject.type, parsedObject.id);
+        fprintf(stdout, "%s\t\t Type:%d\tId:%s\n", parsedObject.name, parsedObject.type,
+                parsedObject.id);
+
+        if (i < objectCount) {
+            worldObjects[i++] = parsedObject;
+        }
     }
 
     fprintf(stderr, ">>> WorldObjects parsing have been finished\n");
@@ -178,13 +219,13 @@ void LoadStaticAssetsForChunk(int chunkId) {
 
 error:
     fprintf(stderr, "Error while Parsing Objects.json\n");
-    free(fileContent);
-    free(json);
-    free(worldObjects);
+    if (fileContent) free(fileContent);
+    if (json) cJSON_Delete(json);
+    if (worldObjects) free(worldObjects);
 
 end:
-    free(fileContent);
-    free(json);
+    if (fileContent) free(fileContent);
+    if (json) cJSON_Delete(json);
     // to remove
-    free(worldObjects);
+    return worldObjects;
 }

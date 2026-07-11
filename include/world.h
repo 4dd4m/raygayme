@@ -3,9 +3,9 @@
 #include "raylib.h"
 
 typedef struct WorldObject {
-    char* id;
+    const char* id;
     bool interactive;
-    char* name;
+    const char* name;
     AssetId type;
     int chunk;
     Vector3 position;
@@ -60,6 +60,7 @@ typedef struct World {
     Vector3 lightDir;
     Camera3D lightCamera;
     Matrix lightViewProj;
+    WorldObject* worldObjects;
     int shadowLightViewProjLoc;
     int shadowLightDirLoc;
     int shadowMapLoc;
