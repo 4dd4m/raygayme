@@ -9,6 +9,7 @@
 #define SHADOWMAP_SIZE 2048
 #define LIGHT_DISTANCE 25.0f
 #define LIGHT_ORTHO_SIZE 20.0f
+#define SHOW_COLLISIONS true
 
 static void SetModelShader(Model* model, Shader shader) {
     for (int i = 0; i < model->materialCount; i++) {
@@ -176,7 +177,9 @@ void DrawWorld(World* world, Camera3D camera) {
 
         switch (obj.type) {
             case COLLISION_TREE:
-                // DrawBoundingBox(obj.boundingBox, RED);
+                if (SHOW_COLLISIONS) {
+                    DrawBoundingBox(obj.boundingBox, RED);
+                }
                 break;
             default:
 

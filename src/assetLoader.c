@@ -10,6 +10,8 @@
 #include "cJSON.h"
 #include "raymath.h"
 
+#define HERE printf("<><>><<>><><> I AM HERE ><><><><><><><><\n");
+
 Asset Assets[ASSET_COUNT] = {0};
 
 char* AssetPath[ASSET_COUNT] = {
@@ -163,6 +165,7 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         cJSON* chunk = cJSON_GetObjectItemCaseSensitive(object, "chunk");
         bool isInteractive = false;
         int parsedChunk = 0;
+        int parsedType = 0;
 
         positions = cJSON_GetObjectItemCaseSensitive(object, "position");
 
@@ -188,7 +191,7 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
             goto error;
         }
 
-        if (!cJSON_IsString(id) || !cJSON_IsString(name) || !cJSON_IsString(type)) {
+        if (!cJSON_IsString(id) || !cJSON_IsString(name) || !cJSON_IsNumber(type)) {
             goto error;
         }
 
@@ -208,13 +211,18 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
             goto error;
         }
 
-        AssetId assetId = GetAssetIdFromString(id->valuestring, type->valuestring);
-        if (assetId < 0 || assetId >= ASSET_COUNT) {
+        if (cJSON_IsNumber(type)) {
+            parsedType = type->valueint;
+        } else if (cJSON_IsString(type) && chunk->valuestring != NULL) {
+            parsedType = atoi(type->valuestring);
+        } else {
             goto error;
         }
 
+        printf("TYPEID: %d", parsedType);
+
         // calculate WorldObjectTransform
-        Model* model = &(GetAsset(assetId)->model);
+        Model* model = &(GetAsset(type->valueint)->model);
         Matrix transform =
             MatrixMultiply(model->transform, MatrixTranslate(position.x, position.y, position.z));
 
@@ -226,7 +234,7 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         WorldObject parsedObject = (WorldObject){.id = strdup(id->valuestring),
                                                  .interactive = isInteractive,
                                                  .name = strdup(name->valuestring),
-                                                 .type = assetId,
+                                                 .type = parsedType,
                                                  .chunk = parsedChunk,
                                                  .position = position,
                                                  .rotation = rotation,
