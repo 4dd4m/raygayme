@@ -6,7 +6,6 @@
 
 #include "assetLoader.h"
 #include "raymath.h"
-#include "rlgl.h"
 #define SHADOWMAP_SIZE 2048
 #define LIGHT_DISTANCE 25.0f
 #define LIGHT_ORTHO_SIZE 20.0f
@@ -76,10 +75,10 @@ void InitWorld(World* world) {
     world->outlineSizeLoc = GetShaderLocation(world->outlineShader, "outlineSize");
 
     // emerald green
-    Vector4 outlineColor = {31.0f / 255.0f, 206.0f / 255.0f, 109.0f / 255.0f, 1.0f};
+    Vector4 outlineColor = {255.0f / 255.0f, 51.0f / 255.0f, 0.0f / 255.0f, 1.0f};
 
     // shader layer above the hull
-    float outlineSize = 0.05f;
+    float outlineSize = 0.006f;
     SetShaderValue(world->outlineShader, world->outlineColorLoc, &outlineColor, SHADER_UNIFORM_VEC4);
     SetShaderValue(world->outlineShader, world->outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
 
@@ -145,23 +144,33 @@ void RenderWorldShadowMap(World* world) {
     EndTextureMode();
 }
 
-void DrawWorld(World* world) {
+void DrawWorld(World* world, Camera3D camera) {
     SetShaderValueMatrix(world->shadowShader, world->shadowLightViewProjLoc, world->lightViewProj);
     SetShaderValue(world->shadowShader, world->shadowLightDirLoc, &world->lightDir,
                    SHADER_UNIFORM_VEC3);
 
     DrawGrid(10, 10);
 
-    // iterate all collision and draw
-    // for (int i = 0; i < world->chunkCount; i++) {
-    //     Chunk currentChunk = world->chunks[i];
+    Ray staticRay = GetScreenToWorldRay(GetMousePosition(), camera);
 
-    //     if (currentChunk.isActive) {
-    //         for (int x = 0; x < currentChunk.collisionCount; x++) {
-    //             DrawBoundingBox(currentChunk.collisions[x].boundingBox, RED);
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < world->worldObjectCount; i++) {
+        WorldObject* obj = &world->worldObjects[i];
+        obj->isMouseOver = false;
+
+        if (obj->model == NULL || obj->model->meshCount <= 0) {
+            continue;
+        }
+
+        for (int meshIndex = 0; meshIndex < obj->model->meshCount; meshIndex++) {
+            RayCollision collision =
+                GetRayCollisionMesh(staticRay, obj->model->meshes[meshIndex], obj->transform);
+
+            if (collision.hit && obj->interactive) {
+                obj->isMouseOver = true;
+                break;
+            }
+        }
+    }
 
     // draw terrain
     DrawModel(
@@ -175,23 +184,26 @@ void DrawWorld(World* world) {
 
         switch (obj.type) {
             case COLLISION_TREE:
-                DrawBoundingBox(obj.boundingBox, RED);
+                // DrawBoundingBox(obj.boundingBox, RED);
                 break;
             default:
+
                 if (obj.isMouseOver) {
-                    rlEnableBackfaceCulling();
-                    rlSetCullFace(RL_CULL_FACE_FRONT);
                     SetModelShader(obj.model, world->outlineShader);
                     DrawModel(*obj.model, obj.position, 1.0f, WHITE);
-                    rlSetCullFace(RL_CULL_FACE_BACK);
+
                     SetModelShader(obj.model, world->shadowShader);
                     DrawModel(*obj.model, obj.position, 1.0f, WHITE);
                 } else {
+                    SetModelShader(obj.model, world->shadowShader);
                     DrawModel(*obj.model, obj.position, 1.0f, WHITE);
                 }
+
                 break;
         }
     }
+
+    // world absolute origin
     DrawCylinder((Vector3){0}, 0.2f, 0.2f, 50.0f, 4, YELLOW);
 }
 

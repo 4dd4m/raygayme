@@ -18,20 +18,47 @@ void InitPlayer(Player* player) {
 }
 
 void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
+    bool isInteractiveClicked = false;
+
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         player->ray = GetScreenToWorldRay(GetMousePosition(), camera->Camera);
     }
 
     // if clicked and the ray has > 0.f
     if (fabsf(player->ray.direction.y) > 0.0001f) {
-        RayCollision hit = GetRayCollisionMesh(player->ray, world->activeChunk->model.meshes[0],
-                                               world->activeChunk->model.transform);
+        for (int i = 0; i < world->worldObjectCount; i++) {
+            WorldObject* obj = &world->worldObjects[i];
 
-        if (hit.hit) {
-            player->targetLocation = hit.point;
-            player->hasTarget = true;
-        } else {
-            player->hasTarget = false;
+            if (!obj->interactive) {
+                continue;
+            }
+
+            if (obj->model == NULL || obj->model->meshCount <= 0) {
+                continue;
+            }
+
+            RayCollision interactiveRayCollision =
+                GetRayCollisionMesh(player->ray, obj->model->meshes[0], obj->transform);
+
+            if (interactiveRayCollision.hit) {
+                isInteractiveClicked = true;
+                player->hasTarget = true;
+                player->targetLocation = world->worldObjects[i].position;
+                break;
+            }
+        }
+
+        if (!isInteractiveClicked) {
+            RayCollision hit = GetRayCollisionMesh(player->ray, world->activeChunk->model.meshes[0],
+                                                   world->activeChunk->model.transform);
+
+            if (hit.hit) {
+                player->targetLocation = hit.point;
+                player->hasTarget = true;
+            } else {
+                player->hasTarget = false;
+                player->targetLocation = (Vector3){0};
+            }
         }
 
     } else {
@@ -64,15 +91,6 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
 
             bool isCollided = false;
 
-            // check collision for world->chunk
-            // for (int i = 0; i < world->activeChunk->collisionCount; i++) {
-            //     if (CheckCollisionBoxes(playerBox, world->activeChunk->collisions[i].boundingBox))
-            //     {
-            //         isCollided = true;
-            //         break;
-            //     }
-            // }
-
             // check collision agains world objects
             for (int i = 0; i < world->worldObjectCount; i++) {
                 switch (world->worldObjects[i].type) {
@@ -87,17 +105,29 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
 
             if (!isCollided) {
                 player->position = nextPos;
-                DrawCylinder(player->targetLocation, 0.2f, 0.2f, 0.01f, 32, RED);
+
+                // if target location != 0, draw target marker
+                if (player->targetLocation.x != 0.0f || player->targetLocation.y != 0.0f ||
+                    player->targetLocation.z != 0.0f) {
+                    DrawCylinder(player->targetLocation, 0.2f, 0.2f, 0.01f, 32, RED);
+                }
             }
         }
     }
 
-    MovePlayer(player);
+    if (!isInteractiveClicked) {
+        MovePlayerOnTerrain(player);
+    } else {
+        // the code above moves the player ok
+        // but because we do not need terrain intersection
+        // calculation we do not overwrite the nextPos in
+        // MovePlayerOnTerrain()
+    }
 
     DrawCylinder(player->position, 0.5f, 0.5f, 1.7f, 32, RED);
 }
 
-void MovePlayer(Player* player) {
+void MovePlayerOnTerrain(Player* player) {
     if (fabsf(player->ray.direction.y) > 0.0001f) {
         float t = -player->ray.position.y / player->ray.direction.y;
 

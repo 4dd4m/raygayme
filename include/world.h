@@ -11,6 +11,7 @@ typedef struct WorldObject {
     Vector3 position;
     Vector3 rotation;
     Model* model;
+    Matrix transform;
     BoundingBox boundingBox;
     bool isMouseOver;
 } WorldObject;
@@ -65,7 +66,9 @@ typedef struct World {
     Camera3D lightCamera;
     Matrix lightViewProj;
     WorldObject* worldObjects;
+    Vector3 pointToClickCursor;
     int worldObjectCount;
+    // some shader
     int shadowLightViewProjLoc;
     int shadowLightDirLoc;
     int shadowMapLoc;
@@ -75,7 +78,6 @@ typedef struct World {
 
 void InitWorld(World* world);
 void UpdateWorld(World* world);
-void DrawWorld(World* world);
+void DrawWorld(World* world, Camera3D camera);
 void RenderWorldShadowMap(World* world);
 void ShutdownWorld(World* world);
-

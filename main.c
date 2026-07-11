@@ -18,7 +18,7 @@ int main(void) {
         RenderWorldShadowMap(&client->world);
 
         BeginMode3D(client->Camera.Camera);
-        DrawWorld(&client->world);
+        DrawWorld(&client->world, client->Camera.Camera);
         UpdatePlayer(&client->player, &client->Camera, &client->world);
 
         EndMode3D();

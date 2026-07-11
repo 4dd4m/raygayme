@@ -20,7 +20,7 @@ typedef struct MyCamera MyCamera;
 void InitPlayer(Player* player);
 
 // moves the player (with)
-void MovePlayer(Player* player);
+void MovePlayerOnTerrain(Player* player);
 
 void UpdatePlayer(Player* player, MyCamera* camera, World* world);
 float GetHeightFromMesh(Mesh mesh, Matrix transform, float worldX, float worldZ);

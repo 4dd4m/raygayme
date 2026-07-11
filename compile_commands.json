@@ -1,0 +1,114 @@
+[
+  {
+    "directory": "C:\\Users\\Dev\\raylibTest",
+    "file": "C:\\Users\\Dev\\raylibTest\\main.c",
+    "arguments": [
+      "gcc.exe",
+      "-O1",
+      "-Wall",
+      "-std=c99",
+      "-Wno-missing-braces",
+      "-I",
+      "C:\\Users\\Dev\\raylibTest\\include",
+      "-g",
+      "-c",
+      "C:\\Users\\Dev\\raylibTest\\main.c"
+    ]
+  },
+  {
+    "directory": "C:\\Users\\Dev\\raylibTest",
+    "file": "C:\\Users\\Dev\\raylibTest\\src\\assetLoader.c",
+    "arguments": [
+      "gcc.exe",
+      "-O1",
+      "-Wall",
+      "-std=c99",
+      "-Wno-missing-braces",
+      "-I",
+      "C:\\Users\\Dev\\raylibTest\\include",
+      "-g",
+      "-c",
+      "C:\\Users\\Dev\\raylibTest\\src\\assetLoader.c"
+    ]
+  },
+  {
+    "directory": "C:\\Users\\Dev\\raylibTest",
+    "file": "C:\\Users\\Dev\\raylibTest\\src\\cJSON.c",
+    "arguments": [
+      "gcc.exe",
+      "-O1",
+      "-Wall",
+      "-std=c99",
+      "-Wno-missing-braces",
+      "-I",
+      "C:\\Users\\Dev\\raylibTest\\include",
+      "-g",
+      "-c",
+      "C:\\Users\\Dev\\raylibTest\\src\\cJSON.c"
+    ]
+  },
+  {
+    "directory": "C:\\Users\\Dev\\raylibTest",
+    "file": "C:\\Users\\Dev\\raylibTest\\src\\client.c",
+    "arguments": [
+      "gcc.exe",
+      "-O1",
+      "-Wall",
+      "-std=c99",
+      "-Wno-missing-braces",
+      "-I",
+      "C:\\Users\\Dev\\raylibTest\\include",
+      "-g",
+      "-c",
+      "C:\\Users\\Dev\\raylibTest\\src\\client.c"
+    ]
+  },
+  {
+    "directory": "C:\\Users\\Dev\\raylibTest",
+    "file": "C:\\Users\\Dev\\raylibTest\\src\\mycamera.c",
+    "arguments": [
+      "gcc.exe",
+      "-O1",
+      "-Wall",
+      "-std=c99",
+      "-Wno-missing-braces",
+      "-I",
+      "C:\\Users\\Dev\\raylibTest\\include",
+      "-g",
+      "-c",
+      "C:\\Users\\Dev\\raylibTest\\src\\mycamera.c"
+    ]
+  },
+  {
+    "directory": "C:\\Users\\Dev\\raylibTest",
+    "file": "C:\\Users\\Dev\\raylibTest\\src\\player.c",
+    "arguments": [
+      "gcc.exe",
+      "-O1",
+      "-Wall",
+      "-std=c99",
+      "-Wno-missing-braces",
+      "-I",
+      "C:\\Users\\Dev\\raylibTest\\include",
+      "-g",
+      "-c",
+      "C:\\Users\\Dev\\raylibTest\\src\\player.c"
+    ]
+  },
+  {
+    "directory": "C:\\Users\\Dev\\raylibTest",
+    "file": "C:\\Users\\Dev\\raylibTest\\src\\world.c",
+    "arguments": [
+      "gcc.exe",
+      "-O1",
+      "-Wall",
+      "-std=c99",
+      "-Wno-missing-braces",
+      "-I",
+      "C:\\Users\\Dev\\raylibTest\\include",
+      "-g",
+      "-c",
+      "C:\\Users\\Dev\\raylibTest\\src\\world.c"
+    ]
+  }
+]

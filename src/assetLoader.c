@@ -200,7 +200,11 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         if (assetId < 0 || assetId >= ASSET_COUNT) {
             goto error;
         }
+
+        // calculate WorldObjectTransform
         Model* model = &(GetAsset(assetId)->model);
+        Matrix transform =
+            MatrixMultiply(model->transform, MatrixTranslate(position.x, position.y, position.z));
 
         // bounding box by default goes to origin, so pull it back where the object really
         BoundingBox box = GetModelBoundingBox(*model);
@@ -215,6 +219,7 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
                                                  .position = position,
                                                  .rotation = rotation,
                                                  .model = model,
+                                                 .transform = transform,
                                                  .boundingBox = box,
                                                  .isMouseOver = true};
 
