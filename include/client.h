@@ -26,7 +26,10 @@ typedef struct Client {
     RenderConfig renderConfig;
 } Client;
 
+Client* CreateClient(void);
+
 void InitClient(Client* client);
 void UpdateClient(Client* client);
 void DrawClient(Client* client);
 void ShutdownClient(Client* client);
+void DestroyClient(Client* client);

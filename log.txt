@@ -44,7 +44,6 @@ INFO: MODEL: [assets/terrain.glb] Model basic data (glb) loaded successfully
 INFO:     > Meshes count: 1
 INFO:     > Materials count: 0 (+1 default)
 INFO: VAO: [ID 2] Mesh uploaded successfully to VRAM (GPU)
-Error opening static objects file: No such file or directory
 INFO: FILEIO: [assets/shaders/shadow.vs] Text file loaded successfully
 INFO: FILEIO: [assets/shaders/shadow.fs] Text file loaded successfully
 INFO: SHADER: [ID 4] Vertex shader compiled successfully
@@ -63,3 +62,8 @@ INFO: TEXTURE: [ID 2] Unloaded texture data from VRAM (GPU)
 INFO: SHADER: [ID 3] Default shader unloaded successfully
 INFO: TEXTURE: [ID 1] Default texture unloaded successfully
 INFO: Window closed successfully
+INFO: VAO: [ID 2] Unloaded vertex array data from VRAM (GPU)
+INFO: MODEL: Unloaded model (and meshes) from RAM and VRAM
+INFO: FBO: [ID 1] Unloaded framebuffer from VRAM (GPU)
+INFO: SHADER: [ID 6] Unloaded shader program data from VRAM (GPU)
+INFO: SHADER: [ID 7] Unloaded shader program data from VRAM (GPU)

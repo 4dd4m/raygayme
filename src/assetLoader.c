@@ -37,7 +37,7 @@ void UnloadAllAssets() {
 }
 
 char* LoadStaticObjectFile() {
-    FILE* file = fopen("assets/terrain/static_objects.json", "r");
+    FILE* file = fopen("assets/terrain/objects.json", "r");
 
     if (!file) {
         perror("Error opening static objects file");
@@ -75,8 +75,8 @@ char* LoadStaticObjectFile() {
 }
 
 void LoadStaticAssetsForChunk(int chunkId) {
-    char* fileContent = LoadStaticObjectFile();
-    cJSON* json = cJSON_Parse(fileContent);
-    free(fileContent);
-    free(json);
+    // char* fileContent = LoadStaticObjectFile();
+    // cJSON* json = cJSON_Parse(fileContent);
+    // free(fileContent);
+    // free(json);
 }

@@ -41,19 +41,18 @@ void InitWorld(World* world) {
     Chunk* chunk = &world->chunks[0];
     chunk->coord.x = 0;
     chunk->coord.z = 0;
+    chunk->objects = NULL;
+    chunk->objectCount = 0;
+    chunk->collisions = NULL;
+    chunk->collisionCount = 0;
     chunk->isActive = true;
 
     chunk->model = LoadModel("assets/terrain.glb");
-
     world->chunkCount = 1;
-
     world->activeChunk = chunk;
-
-    world->activeChunk->collisionCount++;
-
-    LoadStaticAssetsForChunk(0);
-
-    chunk->collisions = malloc(sizeof(CollisionObject) * world->activeChunk->collisionCount);
+    world->activeChunk->collisionCount = 0;
+    // LoadStaticAssetsForChunk(0);
+    // chunk->collisions = malloc(sizeof(CollisionObject) * world->activeChunk->collisionCount);
 
     // Model initialCollision = LoadModel("assets/terrain/collision.glb");
 
@@ -137,6 +136,26 @@ void DrawWorld(World* world) {
 
 void ShutdownWorld(World* world) {
     for (int i = 0; i < world->chunkCount; i++) {
-        free(&world->chunks[i]);
+        Chunk* chunk = &world->chunks[i];
+        if (chunk->collisions != NULL) {
+            free(chunk->collisions);
+            chunk->collisions = NULL;
+        }
+        if (chunk->objects != NULL) {
+            free(chunk->objects);
+            chunk->objects = NULL;
+        }
+        if (chunk->model.meshCount > 0) {
+            UnloadModel(chunk->model);
+        }
+    }
+    if (world->shadowMap.texture.id != 0) {
+        UnloadRenderTexture(world->shadowMap);
+    }
+    if (world->shadowShader.id != 0) {
+        UnloadShader(world->shadowShader);
+    }
+    if (world->shadowDepthShader.id != 0) {
+        UnloadShader(world->shadowDepthShader);
     }
 }

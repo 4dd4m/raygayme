@@ -1,5 +1,17 @@
 #include "client.h"
 
+#include <stdlib.h>
+
+Client* CreateClient(void) {
+    Client* client = malloc(sizeof(*client));
+    if (client == NULL) {
+        return NULL;
+    }
+
+    InitClient(client);
+    return client;
+}
+
 void InitClient(Client* client) {
     client->renderConfig.width = 2500;
     client->renderConfig.height = 900;
@@ -12,4 +24,12 @@ void InitClient(Client* client) {
     InitPlayer(&client->player);
     InitWorld(&client->world);
     InitCamera(&client->Camera, &client->player);
+}
+
+void DestroyClient(Client* client) {
+    if (client == NULL) {
+        return;
+    }
+
+    free(client);
 }
