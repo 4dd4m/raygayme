@@ -17,6 +17,8 @@ typedef struct RenderConfig {
 typedef enum ClientState {
     CLIENT_STATE_CONNECT_SCREEN,
     CLIENT_STATE_CONNECTING,
+    CLIENT_SATE_INIT_PLAYER,
+    CLIENT_STATE_WAITING_FOR_WELCOME,
     CLIENT_STATE_LOADING,
     CLIENT_STATE_IN_GAME,
     CLIENT_STATE_CONNECTION_FAILED
@@ -25,6 +27,7 @@ typedef enum ClientState {
 typedef struct Client {
     World world;
     Player player;
+    PlayerNetState localPlayerNetState;
     MyCamera Camera;
     RenderConfig* renderConfig;
     ClientState clientState;

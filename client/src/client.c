@@ -18,6 +18,7 @@ Client* CreateClient(void) {
 
     client->clientState = CLIENT_STATE_CONNECT_SCREEN;
     client->connectionError = NULL;
+    client->localPlayerNetState = (PlayerNetState){0};
 
     *client->renderConfig =
         (RenderConfig){.width = 2500, .height = 1200, .targetFps = 165, .title = "My FavGame"};
@@ -32,7 +33,6 @@ void InitClientWindow(Client* client) {
 }
 
 void InitPLayerWorldCamera(Client* client) {
-    InitPlayer(&client->player);
     InitWorld(&client->world);
     InitCamera(&client->Camera, &client->player);
 }

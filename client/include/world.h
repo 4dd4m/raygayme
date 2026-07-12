@@ -1,4 +1,5 @@
 #pragma once
+#include "../../shared/player_state.h"
 #include "assetLoader.h"
 #include "raylib.h"
 
@@ -17,6 +18,7 @@ typedef struct WorldObject {
 } WorldObject;
 
 #define MAX_CHUNKS 256
+#define MAX_PLAYERS 10
 
 typedef unsigned int EntityId;
 
@@ -74,6 +76,7 @@ typedef struct World {
     int shadowMapLoc;
     int outlineColorLoc;
     int outlineSizeLoc;
+    PlayerNetState players[MAX_PLAYERS];
 } World;
 
 void InitWorld(World* world);

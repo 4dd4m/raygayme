@@ -129,6 +129,12 @@ void DrawPlayer(Player* player, World* world) {
     }
 }
 
+void UpdatePlayerPosition(Player* player, PlayerNetState* localPlayerNetState) {
+    player->position.x = localPlayerNetState->position.x;
+    player->position.y = localPlayerNetState->position.y;
+    player->position.z = localPlayerNetState->position.z;
+}
+
 void MovePlayerOnTerrain(Player* player) {
     if (fabsf(player->ray.direction.y) > 0.0001f) {
         float t = -player->ray.position.y / player->ray.direction.y;

@@ -66,6 +66,7 @@ int main() {
         // the code will not wait here for connections. If no one wants to connect, just pass
 
         if (new_socket != INVALID_SOCKET) {
+            int newPlayerSlot = 0;
             bool slot_found = false;
             ioctlsocket(new_socket, FIONBIO, &mode);
 
@@ -75,7 +76,7 @@ int main() {
                     slot_found = true;
                     players[i].socket = new_socket;
                     players[i].playerNetState.id = i;
-                    players[i].playerNetState.position = (NetVec3){0};
+                    players[i].playerNetState.position = (NetVec3){0, 0, -17.38};
                     players[i].playerNetState.velocity = (NetVec3){0};
                     players[i].playerNetState.moveState = PLAYER_MOVE_IDLE;
                     players[i].playerNetState.yaw = 0.0f;
@@ -84,6 +85,7 @@ int main() {
 
                     players[i].lastPacketTime = GetServerTimeSeconds();
                     players[i].lastInputTime = GetServerTimeSeconds();
+                    newPlayerSlot = i;
                     printf("%d: Player has been connected! ID: %lld\n", ++n, i);
                     break;
                 }
@@ -93,10 +95,21 @@ int main() {
                 printf("%d: Server is full\n", n);
                 closesocket(new_socket);
             }
+
+            // New Connection so send back the Id
+            char welcomeBuffer[100];
+
+            sprintf(welcomeBuffer, "WELCOME|%d|%f,%f,%f\n", newPlayerSlot,
+                    players[newPlayerSlot].playerNetState.position.x,
+                    players[newPlayerSlot].playerNetState.position.y,
+                    players[newPlayerSlot].playerNetState.position.z);
+
+            printf(welcomeBuffer);
+
+            send(new_socket, welcomeBuffer, sizeof(welcomeBuffer), 0);
         }
 
         // Read incoming data
-
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
             if (!players[i].isConnected) continue;
 

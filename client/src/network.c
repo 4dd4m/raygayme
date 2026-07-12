@@ -53,7 +53,7 @@ bool Network_Init(const char* ip, int port) {
 
 void Network_SendData(float x, float y, float z) {}
 
-void Network_ReceiveData(PlayerNetState* world_players) {
+void Network_ReceiveData(PlayerNetState* world_players, PlayerNetState* player) {
     if (client_socket == INVALID_SOCKET) return;
 
     char recvBuffer[2048];
@@ -62,27 +62,12 @@ void Network_ReceiveData(PlayerNetState* world_players) {
     if (valread > 0) {  // if buffer has anything inside it
         recvBuffer[valread] = '\0';
 
-        // change everybody to offline
-        for (size_t i = 0; i < MAX_PLAYERS; i++) {
-            remote_players[i].isConnected = false;
-
-            char* token = strtok(recvBuffer, "|");
-
-            while (token != NULL) {
-                int id;
-                float x, y, z;
-
-                if (sscanf(token, "%d:%f,%f,%f", &id, &x, &y, &z) == 4) {
-                    if (id >= 0 && id < MAX_PLAYERS) {
-                        remote_players[id].id = id;
-
-                        remote_players[id].position = (NetVec3){x, y, z};
-                        remote_players[id].isConnected = true;
-                    }
-                }
-                token = strtok(NULL, "|");
-            }
+        if (strncmp(recvBuffer, "WELCOME|", 8) == 0) {
+            ParseWelcome(recvBuffer, world_players, player);
+        } else {
+            ParseSnapShot(recvBuffer, world_players, player);
         }
+
     } else if (valread == 0 ||
                (valread == SOCKET_ERROR &&
                 WSAGetLastError() !=
@@ -99,5 +84,44 @@ void Network_Shutdown(void) {
 
         WSACleanup();
         printf("[Network]: Connection has been closed by the client\n");
+    }
+}
+
+void ParseWelcome(char* buffer, PlayerNetState* world_players, PlayerNetState* localPlayerNetState) {
+    printf("Welcome received\n");
+
+    if (sscanf(buffer, "WELCOME|%d|%f,%f,%f\n", &localPlayerNetState->id,
+               &localPlayerNetState->position.x, &localPlayerNetState->position.y,
+               &localPlayerNetState->position.z) == 4) {
+        printf("Received ID: %d Player Coordinates: X:%f Y:%f Z:%f\n", localPlayerNetState->id,
+               localPlayerNetState->position.x, localPlayerNetState->position.y,
+               localPlayerNetState->position.z);
+    }
+    // else uninitailized localPlayerNetState will put the player on 0.0.0
+    localPlayerNetState->isConnected = true;
+}
+
+void ParseSnapShot(char* buffer, PlayerNetState* world_players,
+                   PlayerNetState* localPlayerNetState) {
+    // change everybody to offline
+    for (size_t i = 0; i < MAX_PLAYERS; i++) {
+        remote_players[i].isConnected = false;
+
+        char* token = strtok(buffer, "|");
+
+        while (token != NULL) {
+            int id;
+            float x, y, z;
+
+            if (sscanf(token, "%d:%f,%f,%f", &id, &x, &y, &z) == 4) {
+                if (id >= 0 && id < MAX_PLAYERS) {
+                    remote_players[id].id = id;
+
+                    remote_players[id].position = (NetVec3){x, y, z};
+                    remote_players[id].isConnected = true;
+                }
+            }
+            token = strtok(NULL, "|");
+        }
     }
 }

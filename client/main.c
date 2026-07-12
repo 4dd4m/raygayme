@@ -57,9 +57,22 @@ void UpdateClient(Client* client) {
             // blocking call, can freeze on timeout
             bool isConnected = Network_Init("127.0.0.1", 9999);
             if (isConnected) {
-                client->clientState = CLIENT_STATE_LOADING;
+                client->clientState = CLIENT_SATE_INIT_PLAYER;
             } else {
                 client->clientState = CLIENT_STATE_CONNECTION_FAILED;
+            }
+            break;
+
+        case CLIENT_SATE_INIT_PLAYER:
+            InitPlayer(&client->player);
+            client->clientState = CLIENT_STATE_WAITING_FOR_WELCOME;
+            break;
+
+        case CLIENT_STATE_WAITING_FOR_WELCOME:
+            Network_ReceiveData(client->world.players, &client->localPlayerNetState);
+            if (client->localPlayerNetState.isConnected) {
+                UpdatePlayerPosition(&client->player, &client->localPlayerNetState);
+                client->clientState = CLIENT_STATE_LOADING;
             }
             break;
 
@@ -69,6 +82,7 @@ void UpdateClient(Client* client) {
             break;
 
         case CLIENT_STATE_IN_GAME:
+            Network_ReceiveData(client->world.players, &client->localPlayerNetState);
             UpdateMyCameraState(&client->Camera, &client->player);
             UpdateWorld(&client->world);
             UpdatePlayer(&client->player, &client->Camera, &client->world);

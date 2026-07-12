@@ -29,3 +29,4 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world);
 float GetHeightFromMesh(Mesh mesh, Matrix transform, float worldX, float worldZ);
 void DebugPlayerPosition(Player* player);
 void DrawPlayer(Player* player, World* world);
+void UpdatePlayerPosition(Player* player, PlayerNetState* localPlayerNetState);

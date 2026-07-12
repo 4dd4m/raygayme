@@ -1,7 +1,5 @@
 [
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\main.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -13,11 +11,11 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\main.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\main.c"
   },
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\assetLoader.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -29,11 +27,11 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\src\\assetLoader.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\assetLoader.c"
   },
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\cJSON.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -45,11 +43,11 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\src\\cJSON.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\cJSON.c"
   },
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\client.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -61,11 +59,11 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\src\\client.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\client.c"
   },
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\mycamera.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -77,11 +75,11 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\src\\mycamera.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\mycamera.c"
   },
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\network.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -93,11 +91,11 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\src\\network.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\network.c"
   },
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\player.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -109,11 +107,11 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\src\\player.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\player.c"
   },
   {
-    "directory": "C:\\Users\\Dev\\raylibTest\\client",
-    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\world.c",
     "arguments": [
       "gcc.exe",
       "-O1",
@@ -125,6 +123,8 @@
       "-g",
       "-c",
       "C:\\Users\\Dev\\raylibTest\\client\\src\\world.c"
-    ]
+    ],
+    "directory": "C:\\Users\\Dev\\raylibTest\\client",
+    "file": "C:\\Users\\Dev\\raylibTest\\client\\src\\world.c"
   }
 ]
