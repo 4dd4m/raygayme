@@ -11,6 +11,8 @@ char playerBuffer[128];
 void InitPlayer(Player* player) {
     player->id = 0;
     player->position = (Vector3){40.0f, 0.0f, 10.0f};
+    player->hasPosition = true;
+    player->ray = (Ray){0};
     player->playerName = "Adam";
     player->model = NULL;
     player->drawCollisionBox = true;
@@ -22,47 +24,48 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         player->ray = GetScreenToWorldRay(GetMousePosition(), camera->Camera);
-    }
 
-    // if clicked and the ray has > 0.f
-    if (fabsf(player->ray.direction.y) > 0.0001f) {
-        for (int i = 0; i < world->worldObjectCount; i++) {
-            WorldObject* obj = &world->worldObjects[i];
+        // if clicked and the ray has > 0.f
+        if (fabsf(player->ray.direction.y) > 0.0001f) {
+            for (int i = 0; i < world->worldObjectCount; i++) {
+                WorldObject* obj = &world->worldObjects[i];
 
-            if (!obj->interactive) {
-                continue;
+                if (!obj->interactive) {
+                    continue;
+                }
+
+                if (obj->model == NULL || obj->model->meshCount <= 0) {
+                    continue;
+                }
+
+                RayCollision interactiveRayCollision =
+                    GetRayCollisionMesh(player->ray, obj->model->meshes[0], obj->transform);
+
+                if (interactiveRayCollision.hit) {
+                    isInteractiveClicked = true;
+                    player->hasTarget = true;
+                    player->targetLocation = world->worldObjects[i].position;
+                    break;
+                }
             }
 
-            if (obj->model == NULL || obj->model->meshCount <= 0) {
-                continue;
+            if (!isInteractiveClicked) {  // raycost to terrain
+                RayCollision hit =
+                    GetRayCollisionMesh(player->ray, world->activeChunk->model.meshes[0],
+                                        world->activeChunk->model.transform);
+
+                if (hit.hit) {
+                    player->targetLocation = hit.point;
+                    player->hasTarget = true;
+                } else {
+                    player->hasTarget = false;
+                    player->targetLocation = (Vector3){0};
+                }
             }
 
-            RayCollision interactiveRayCollision =
-                GetRayCollisionMesh(player->ray, obj->model->meshes[0], obj->transform);
-
-            if (interactiveRayCollision.hit) {
-                isInteractiveClicked = true;
-                player->hasTarget = true;
-                player->targetLocation = world->worldObjects[i].position;
-                break;
-            }
+        } else {
+            player->hasTarget = false;
         }
-
-        if (!isInteractiveClicked) {
-            RayCollision hit = GetRayCollisionMesh(player->ray, world->activeChunk->model.meshes[0],
-                                                   world->activeChunk->model.transform);
-
-            if (hit.hit) {
-                player->targetLocation = hit.point;
-                player->hasTarget = true;
-            } else {
-                player->hasTarget = false;
-                player->targetLocation = (Vector3){0};
-            }
-        }
-
-    } else {
-        player->hasTarget = false;
     }
 
     if (player->hasTarget) {
@@ -82,49 +85,48 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
             nextPos.y = GetHeightFromMesh(world->activeChunk->model.meshes[0],
                                           world->activeChunk->model.transform, nextPos.x, nextPos.z);
 
-            BoundingBox playerBox = {.min = {nextPos.x - 0.5f, nextPos.y, nextPos.z - 0.5f},
-                                     .max = {nextPos.x + 0.5f, nextPos.y + 1.7f, nextPos.z + 0.5f}};
+            player->boundingBox =
+                (BoundingBox){.min = {nextPos.x - 0.5f, nextPos.y, nextPos.z - 0.5f},
+                              .max = {nextPos.x + 0.5f, nextPos.y + 1.7f, nextPos.z + 0.5f}};
 
-            if (player->drawCollisionBox) {
-                DrawBoundingBox(playerBox, YELLOW);
-            }
-
-            bool isCollided = false;
+            player->isColliding = false;
 
             // check collision agains world objects
             for (int i = 0; i < world->worldObjectCount; i++) {
                 switch (world->worldObjects[i].type) {
                     case COLLISION_TREE:
-                        if (CheckCollisionBoxes(playerBox, world->worldObjects[i].boundingBox)) {
-                            isCollided = true;
+                        if (CheckCollisionBoxes(player->boundingBox,
+                                                world->worldObjects[i].boundingBox)) {
+                            player->isColliding = true;
                             break;
                         }
                         break;
                 }
             }
 
-            if (!isCollided) {
+            if (!player->isColliding) {
                 player->position = nextPos;
-
-                // if target location != 0, draw target marker
-                if (player->targetLocation.x != 0.0f || player->targetLocation.y != 0.0f ||
-                    player->targetLocation.z != 0.0f) {
-                    DrawCylinder(player->targetLocation, 0.2f, 0.2f, 0.01f, 32, RED);
-                }
             }
         }
     }
+}
 
-    if (!isInteractiveClicked) {
-        MovePlayerOnTerrain(player);
-    } else {
-        // the code above moves the player ok
-        // but because we do not need terrain intersection
-        // calculation we do not overwrite the nextPos in
-        // MovePlayerOnTerrain()
+void DrawPlayer(Player* player, World* world) {
+    // this is player. always visible
+    if (player->hasPosition) {
+        DrawCylinder(player->position, 0.5f, 0.5f, 1.7f, 32, RED);
     }
 
-    DrawCylinder(player->position, 0.5f, 0.5f, 1.7f, 32, RED);
+    if (player->hasTarget && !player->isColliding) {
+        DrawCylinder(player->targetLocation, 0.2f, 0.2f, 0.1f, 32, BLUE);
+    }
+
+    if (player->drawCollisionBox &&
+        (player->boundingBox.max.x != 0.0f && player->boundingBox.max.y != 0.0f &&
+         player->boundingBox.max.z != 0.0f && player->boundingBox.min.z != 0.0f &&
+         player->boundingBox.min.z != 0.0f && player->boundingBox.min.z != 0.0f)) {
+        DrawBoundingBox(player->boundingBox, YELLOW);
+    }
 }
 
 void MovePlayerOnTerrain(Player* player) {

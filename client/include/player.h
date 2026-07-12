@@ -8,11 +8,14 @@ typedef struct Player {
     Asset* model;
     char* playerName;
     Vector3 position;
+    bool hasPosition;
     Vector3 targetLocation;
-    Ray ray;
     bool hasTarget;
+    Ray ray;
     float movementSpeed;
     bool drawCollisionBox;
+    BoundingBox boundingBox;
+    bool isColliding;
 } Player;
 
 typedef struct MyCamera MyCamera;
@@ -25,3 +28,4 @@ void MovePlayerOnTerrain(Player* player);
 void UpdatePlayer(Player* player, MyCamera* camera, World* world);
 float GetHeightFromMesh(Mesh mesh, Matrix transform, float worldX, float worldZ);
 void DebugPlayerPosition(Player* player);
+void DrawPlayer(Player* player, World* world);

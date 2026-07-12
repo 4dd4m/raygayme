@@ -5,42 +5,33 @@
 
 #include "network.h"
 
-typedef struct RenderConfig {
-    int width;
-    int height;
-    const char* title;
-    int targetFps;
-} RenderConfig;
-
 Client* CreateClient(void) {
     Client* client = malloc(sizeof(*client));
     if (client == NULL) {
         return NULL;
     }
 
-    InitClient(client);
-    return client;
-}
-
-void InitClient(Client* client) {
     client->renderConfig = malloc(sizeof(RenderConfig));
     if (client->renderConfig == NULL) {
-        return;
+        return NULL;
     }
+
+    client->clientState = CLIENT_STATE_CONNECT_SCREEN;
+    client->connectionError = NULL;
 
     *client->renderConfig =
         (RenderConfig){.width = 2500, .height = 1200, .targetFps = 165, .title = "My FavGame"};
 
+    return client;
+}
+
+void InitClientWindow(Client* client) {
     InitWindow(client->renderConfig->width, client->renderConfig->height,
                client->renderConfig->title);
     SetTargetFPS(client->renderConfig->targetFps);
+}
 
-    bool isConnected = Network_Init("127.0.0.1", 9999);
-    if (!isConnected) {
-        printf("[Client]: Network init failed\n");
-        exit(1);
-    }
-
+void InitPLayerWorldCamera(Client* client) {
     InitPlayer(&client->player);
     InitWorld(&client->world);
     InitCamera(&client->Camera, &client->player);

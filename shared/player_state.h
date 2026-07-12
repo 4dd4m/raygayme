@@ -1,5 +1,6 @@
 #pragma once
 #include <stddef.h>
+#include <stdbool.h>
 
 typedef struct NetVec3 {
     float x;
@@ -19,4 +20,5 @@ typedef struct PlayerNetState {
     NetVec3 velocity;
     float yaw;
     PlayerMoveState moveState;
+    bool isConnected;
 } PlayerNetState;
