@@ -10,7 +10,7 @@ char posBuffer[128];
 char zoomBuffer[128];
 
 void InitCamera(MyCamera* camera, Player* player) {
-    printf("### InitCamera\n");
+    // printf("### InitCamera\n");
     camera->Camera.position = (Vector3){-20.4f, 35.87f, 74.83f};
     camera->Camera.target = player->position;
     camera->Camera.up = (Vector3){0.0f, 1.0f, 0.0f};

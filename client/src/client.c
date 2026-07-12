@@ -1,6 +1,9 @@
 #include "client.h"
 
+#include <stdio.h>
 #include <stdlib.h>
+
+#include "network.h"
 
 typedef struct RenderConfig {
     int width;
@@ -31,6 +34,12 @@ void InitClient(Client* client) {
     InitWindow(client->renderConfig->width, client->renderConfig->height,
                client->renderConfig->title);
     SetTargetFPS(client->renderConfig->targetFps);
+
+    bool isConnected = Network_Init("127.0.0.1", 9999);
+    if (!isConnected) {
+        printf("[Client]: Network init failed\n");
+        exit(1);
+    }
 
     InitPlayer(&client->player);
     InitWorld(&client->world);

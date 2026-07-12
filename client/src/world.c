@@ -34,7 +34,7 @@ static void UpdateLightView(World* world) {
 }
 
 void InitWorld(World* world) {
-    printf("### Initializing World\n");
+    // printf("### Initializing World\n");
     world->chunkCount = 0;
 
     // load starting chunk

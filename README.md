@@ -1,3 +1,3 @@
 # Some Tinkering with the Raylib lib
 
-In C
+Grid (rács) alapú vagy Quadtree struktúra

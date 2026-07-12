@@ -39,8 +39,6 @@ $compileCommands |
 ConvertTo-Json -Depth 5 |
 Set-Content -Path "compile_commands.json" -Encoding UTF8
 
-Write-Host "Generated compile_commands.json"
-
 # Build executable
 $buildArguments = @(
     $sourceFiles
@@ -50,7 +48,12 @@ $buildArguments = @(
     "-lraylib"
     "-lopengl32"
     "-lgdi32"
-    "-lwinmm"
+    "-lws2_32",
+    "-lwinmm",
+    "-Wno-unused-function",
+    "-Wno-maybe-uninitialized",
+    "-Wno-switch"
+
 )
 
 & $compiler $buildArguments
@@ -60,14 +63,6 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!"
     Read-Host "Press Enter to exit"
     exit $LASTEXITCODE
-}
-
-$ctags = Get-Command ctags -ErrorAction SilentlyContinue
-if ($ctags) {
-    & $ctags.Source -R --languages=C --exclude=build --exclude=lib .
-}
-else {
-    Write-Host "ctags not found; skipping tag generation"
 }
 
 # Run and save output to log.txt

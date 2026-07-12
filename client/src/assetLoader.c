@@ -12,6 +12,8 @@
 
 #define HERE printf("<><>><<>><><> I AM HERE ><><><><><><><><\n");
 
+#define Debug 0
+
 Asset Assets[ASSET_COUNT] = {0};
 
 char* AssetPath[ASSET_COUNT] = {
@@ -24,14 +26,14 @@ char* AssetPath[ASSET_COUNT] = {
 
 Asset* GetAsset(AssetId id) {
     if (Assets[id].isLoaded) {
-        printf("Cached Asset >>> ");
+        if (Debug) printf("Cached Asset >>> \n");
         return &Assets[id];
     }
 
     Assets[id].model = LoadModel(AssetPath[id]);
     Assets[id].isLoaded = true;
 
-    printf("<<< Load Model");
+    if (Debug) printf("<<< Load Model\n");
     return &Assets[id];
 }
 
@@ -112,7 +114,7 @@ char* LoadStaticObjectFile() {
     size_t read_size = fread(buffer, 1, length, file);
     buffer[read_size] = '\0';
 
-    printf("!!! Static File Json has been loaded with a size of %lld\n", read_size);
+    if (Debug) printf("!!! Static File Json has been loaded with a size of %lld\n", read_size);
 
     fclose(file);
 
@@ -155,7 +157,7 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         goto error;
     }
 
-    printf("--- Found %d objects\n", objectCount);
+    if (Debug) printf("--- Found %d objects\n", objectCount);
 
     cJSON_ArrayForEach(object, objects) {
         cJSON* id = cJSON_GetObjectItemCaseSensitive(object, "id");
@@ -219,7 +221,7 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
             goto error;
         }
 
-        printf("TYPEID: %d", parsedType);
+        if (Debug) printf("TYPEID: %d", parsedType);
 
         // calculate WorldObjectTransform
         Model* model = &(GetAsset(type->valueint)->model);
@@ -243,16 +245,18 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
                                                  .boundingBox = box,
                                                  .isMouseOver = true};
 
-        fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n", parsedObject.name,
-                parsedObject.type, parsedObject.id, parsedObject.position.x, parsedObject.position.y,
-                parsedObject.position.z);
+        if (Debug) {
+            fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n",
+                    parsedObject.name, parsedObject.type, parsedObject.id, parsedObject.position.x,
+                    parsedObject.position.y, parsedObject.position.z);
+        }
 
         if (i < objectCount) {
             worldObjects[i++] = parsedObject;
         }
     }
 
-    fprintf(stderr, ">>> WorldObjects parsing have been finished\n");
+    if (Debug) fprintf(stderr, ">>> WorldObjects parsing have been finished\n");
     if (worldObjectCount) {
         *worldObjectCount = i;
     }
