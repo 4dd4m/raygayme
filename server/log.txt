@@ -1,1 +1,4 @@
 Server Up!
+1: Player has been connected! ID: 0
+WELCOME|0|0.000000,0.000000,-17.379999
+2: Player has been disconnected! ID: 0

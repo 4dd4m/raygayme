@@ -1,0 +1,17 @@
+[
+  {
+    "directory": "/home/addam/Asztal/raylibTest/server",
+    "file": "/home/addam/Asztal/raylibTest/server/main.c",
+    "arguments": ["gcc", "-O1", "-Wall", "-std=c99", "-Wno-missing-braces", "-I/home/addam/Asztal/raylibTest/server/include", "-I/home/addam/Asztal/raylibTest/server/../shared", "-g", "-D_POSIX_C_SOURCE=200809L", "-c", "/home/addam/Asztal/raylibTest/server/main.c"]
+  },
+  {
+    "directory": "/home/addam/Asztal/raylibTest/server",
+    "file": "/home/addam/Asztal/raylibTest/server/src/test.c",
+    "arguments": ["gcc", "-O1", "-Wall", "-std=c99", "-Wno-missing-braces", "-I/home/addam/Asztal/raylibTest/server/include", "-I/home/addam/Asztal/raylibTest/server/../shared", "-g", "-D_POSIX_C_SOURCE=200809L", "-c", "/home/addam/Asztal/raylibTest/server/src/test.c"]
+  },
+  {
+    "directory": "/home/addam/Asztal/raylibTest/server",
+    "file": "/home/addam/Asztal/raylibTest/server/../shared/dummy.c",
+    "arguments": ["gcc", "-O1", "-Wall", "-std=c99", "-Wno-missing-braces", "-I/home/addam/Asztal/raylibTest/server/include", "-I/home/addam/Asztal/raylibTest/server/../shared", "-g", "-D_POSIX_C_SOURCE=200809L", "-c", "/home/addam/Asztal/raylibTest/server/../shared/dummy.c"]
+  }
+]

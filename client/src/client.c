@@ -21,12 +21,13 @@ Client* CreateClient(void) {
     client->localPlayerNetState = (PlayerNetState){0};
 
     *client->renderConfig =
-        (RenderConfig){.width = 2500, .height = 1200, .targetFps = 165, .title = "My FavGame"};
+        (RenderConfig){.width = 1280, .height = 720, .targetFps = 165, .title = "My FavGame"};
 
     return client;
 }
 
 void InitClientWindow(Client* client) {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(client->renderConfig->width, client->renderConfig->height,
                client->renderConfig->title);
     SetTargetFPS(client->renderConfig->targetFps);

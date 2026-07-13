@@ -24,6 +24,21 @@ char* AssetPath[ASSET_COUNT] = {
     "assets/collisions/COLLISION_TREE.glb",
 };
 
+static char* DuplicateString(const char* text) {
+    if (text == NULL) {
+        return NULL;
+    }
+
+    size_t length = strlen(text) + 1;
+    char* copy = malloc(length);
+    if (copy == NULL) {
+        return NULL;
+    }
+
+    memcpy(copy, text, length);
+    return copy;
+}
+
 Asset* GetAsset(AssetId id) {
     if (Assets[id].isLoaded) {
         if (Debug) printf("Cached Asset >>> \n");
@@ -114,7 +129,7 @@ char* LoadStaticObjectFile() {
     size_t read_size = fread(buffer, 1, length, file);
     buffer[read_size] = '\0';
 
-    if (Debug) printf("!!! Static File Json has been loaded with a size of %lld\n", read_size);
+    if (Debug) printf("!!! Static File Json has been loaded with a size of %zu\n", read_size);
 
     fclose(file);
 
@@ -233,9 +248,9 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
         box.min = Vector3Add(box.min, position);
         box.max = Vector3Add(box.max, position);
 
-        WorldObject parsedObject = (WorldObject){.id = strdup(id->valuestring),
+        WorldObject parsedObject = (WorldObject){.id = DuplicateString(id->valuestring),
                                                  .interactive = isInteractive,
-                                                 .name = strdup(name->valuestring),
+                                                 .name = DuplicateString(name->valuestring),
                                                  .type = parsedType,
                                                  .chunk = parsedChunk,
                                                  .position = position,
@@ -244,6 +259,12 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
                                                  .transform = transform,
                                                  .boundingBox = box,
                                                  .isMouseOver = true};
+
+        if (parsedObject.id == NULL || parsedObject.name == NULL) {
+            free((void*)parsedObject.id);
+            free((void*)parsedObject.name);
+            goto error;
+        }
 
         if (Debug) {
             fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n",
