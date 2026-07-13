@@ -3,109 +3,71 @@
 //
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include <windows.h>
 
 #include "player_state.h"
+#include "server.h"
+#include "serverAssetLoader.h"
 
-#define PORT 9999
-#define MAX_PLAYERS 10
-#define TICK 33  // tick duration in a sec
-
-typedef struct ServerPlayer {
-    PlayerNetState playerNetState;
-    SOCKET socket;
-    bool isConnected;
-
-    double lastPacketTime;
-    double lastInputTime;
-} ServerPlayer;
-
-ServerPlayer players[MAX_PLAYERS];
+WorldState worldState = {0};
 
 double GetServerTimeSeconds(void);
 void UpdatePlayerPosition(PlayerNetState* netState, float delta);
+void load_server_terrain_data();
 
 int n = 0;
 
 int main() {
-    double lastTime = GetServerTimeSeconds();  // base for delta calculation
-    float serverDeltaTime = 0.0f;
-    // turn terminal buffering off
+    load_server_terrain_data();
+    double lastTime = GetServerTimeSeconds();
+    worldState.serverDeltaTime = 0.0f;
+    worldState.tickPerMs = 33;
+
     setvbuf(stdout, NULL, _IONBF, 0);
-    // windows specific, just access to the networking layer
-    WSADATA wsa;
 
-    // creating the server main socket
-    SOCKET server_fd;
-    struct sockaddr_in server;
+    set_up_non_blocking_socket();
 
-    // Winsock inicializálás (Windows specifikus)
-    WSAStartup(MAKEWORD(2, 2), &wsa);
-
-    // AF_INET -> ipv4, SOCK_STREAM -> TCP (UDP -> SOCK_DGRAM)
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);
-
-    // non-blocking
-    u_long mode = 1;
-    ioctlsocket(server_fd, FIONBIO, &mode);
-
-    server.sin_family = AF_INET;          // IPV4
-    server.sin_addr.s_addr = INADDR_ANY;  // receive data from all network devices
-    server.sin_port = htons(PORT);        // port conversion
-
-    // bind
-    bind(server_fd, (struct sockaddr*)&server, sizeof(server));
-    listen(server_fd, 3);  // 3 players can queue up (connecting)
-    printf("Server Up!\n");
-
-    while (1) {  // main server loop
+    while (1) {
         double now = GetServerTimeSeconds();
-        serverDeltaTime = now - lastTime;
+        worldState.serverDeltaTime = now - lastTime;
         lastTime = now;
 
-        DWORD start_time =
-            GetTickCount();  // get sytstem time to calcualte processTime - tick = nextTick
-
-        // handling new connections
-        struct sockaddr_in address;
-        int addrlen = sizeof(address);
-        SOCKET new_socket = accept(server_fd, (struct sockaddr*)&address,
-                                   &addrlen);  // accept() accepting connections
-        // the code will not wait here for connections. If no one wants to connect, just pass
+        DWORD start_time = GetTickCount();
+        SOCKET new_socket = accept_new_connection();
 
         if (new_socket != INVALID_SOCKET) {
             bool slot_found = false;
-            ioctlsocket(new_socket, FIONBIO, &mode);
 
-            // search for inactive players
+            ioctl_socket();
+
             for (size_t i = 0; i < MAX_PLAYERS; i++) {
-                if (!players[i].isConnected) {
+                if (!worldState.players[i].isConnected) {
                     slot_found = true;
-                    players[i].socket = new_socket;
-                    players[i].playerNetState.id = i;
-                    players[i].playerNetState.position = (NetVec3){0, 0, -17.38};
-                    players[i].playerNetState.velocity = 0;
-                    players[i].playerNetState.moveState = PLAYER_MOVE_IDLE;
-                    players[i].playerNetState.yaw = 0.0f;
-                    players[i].playerNetState.hasTarget = 0.0f;
+                    worldState.players[i].socket = new_socket;
+                    worldState.players[i].playerNetState.id = i;
+                    worldState.players[i].playerNetState.position = (NetVec3){0, 0, -17.38};
+                    worldState.players[i].playerNetState.velocity = 0;
+                    worldState.players[i].playerNetState.moveState = PLAYER_MOVE_IDLE;
+                    worldState.players[i].playerNetState.yaw = 0.0f;
+                    worldState.players[i].playerNetState.hasTarget = 0.0f;
+                    worldState.players[i].isConnected = true;
+                    worldState.players[i].lastPacketTime = GetServerTimeSeconds();
+                    worldState.players[i].lastInputTime = GetServerTimeSeconds();
+                    worldState.players[i].chunkCoord = (ServerVec2i){0, 0};
+                    worldState.players[i].chunkIndex = 0;
 
-                    players[i].isConnected = true;
-
-                    players[i].lastPacketTime = GetServerTimeSeconds();
-                    players[i].lastInputTime = GetServerTimeSeconds();
                     printf("%d: Player has been connected! ID: %lld\n", ++n, i);
 
-                    // New Connection so send back the Id
                     char welcomeBuffer[100];
-
                     sprintf(welcomeBuffer, "WELCOME|%llu|%f,%f,%f\n", (unsigned long long)i,
-                            players[i].playerNetState.position.x,
-                            players[i].playerNetState.position.y,
-                            players[i].playerNetState.position.z);
+                            worldState.players[i].playerNetState.position.x,
+                            worldState.players[i].playerNetState.position.y,
+                            worldState.players[i].playerNetState.position.z);
 
-                    printf(welcomeBuffer);
-
-                    send(new_socket, welcomeBuffer, sizeof(welcomeBuffer), 0);
+                    printf("%s", welcomeBuffer);
+                    send(new_socket, welcomeBuffer, strlen(welcomeBuffer), 0);
                     break;
                 }
             }
@@ -116,120 +78,106 @@ int main() {
             }
         }
 
-        // Read incoming data
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
-            if (!players[i].isConnected) continue;
+            if (!worldState.players[i].isConnected) continue;
 
             char buffer[1024];
-            int valread = recv(players[i].socket, buffer, sizeof(buffer) - 1, 0);
+            int valread = recv(worldState.players[i].socket, buffer, sizeof(buffer) - 1, 0);
 
-            if (valread > 0) {           // if something read from the player
-                buffer[valread] = '\0';  // terminating the buffer
-                if (sscanf(buffer, "MOVE|%d|%f,%f,%f", &players[i].playerNetState.id,
-                           &players[i].playerNetState.targetPosition.x,
-                           &players[i].playerNetState.targetPosition.y,
-                           &players[i].playerNetState.targetPosition.z) == 4) {
+            if (valread > 0) {
+                buffer[valread] = '\0';
+                if (sscanf(buffer, "MOVE|%d|%f,%f,%f", &worldState.players[i].playerNetState.id,
+                           &worldState.players[i].playerNetState.targetPosition.x,
+                           &worldState.players[i].playerNetState.targetPosition.y,
+                           &worldState.players[i].playerNetState.targetPosition.z) == 4) {
                     printf("%d: Player %lld asks to move to: X:%f, y:%f, z:%f\n", ++n, i,
-                           players[i].playerNetState.targetPosition.x,
-                           players[i].playerNetState.targetPosition.y,
-                           players[i].playerNetState.targetPosition.z);
+                           worldState.players[i].playerNetState.targetPosition.x,
+                           worldState.players[i].playerNetState.targetPosition.y,
+                           worldState.players[i].playerNetState.targetPosition.z);
 
-                    players[i].playerNetState.hasTarget = true;
-                    players[i].playerNetState.velocity = 3.0f;
+                    worldState.players[i].playerNetState.hasTarget = true;
+                    worldState.players[i].playerNetState.velocity = 3.0f;
                 }
 
-                players[i].lastInputTime = GetServerTimeSeconds();
+                worldState.players[i].lastInputTime = GetServerTimeSeconds();
             } else if (valread == 0) {
                 printf("%d: Player has been disconnected gracefully! ID: %lld\n", ++n, i);
-            }
-            // nothing read from the player or player connection is not present
-            else {
+                closesocket(worldState.players[i].socket);
+                worldState.players[i].isConnected = false;
+            } else {
                 int error = WSAGetLastError();
 
                 if (error == WSAEWOULDBLOCK) {
-                    // no buffer data
                     continue;
-                } else {
-                    printf("%d: Player connection has been lost! ID: %lld\n", ++n, i);
-                    closesocket(players[i].socket);
-                    players[i].isConnected = false;
                 }
+
+                printf("%d: Player connection has been lost! ID: %lld\n", ++n, i);
+                closesocket(worldState.players[i].socket);
+                worldState.players[i].isConnected = false;
             }
         }
 
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
-            if (!players[i].isConnected) continue;
-
-            UpdatePlayerPosition(&players[i].playerNetState, serverDeltaTime);
+            if (!worldState.players[i].isConnected) continue;
+            UpdatePlayerPosition(&worldState.players[i].playerNetState, worldState.serverDeltaTime);
         }
 
-        // BROADCAST WORLD STATE
         char broadcast_buffer[2048] = "";
         int offset = 0;
 
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
-            if (!players[i].isConnected) continue;
+            if (!worldState.players[i].isConnected) continue;
 
             offset += sprintf(broadcast_buffer + offset, "SNAPSHOT|");
-
-            offset += sprintf(
-                broadcast_buffer + offset, "%lld:%f,%f,%f|", i, players[i].playerNetState.position.x,
-                players[i].playerNetState.position.y, players[i].playerNetState.position.z);
-
-            // printf("%f - SNAPSHOT|%lld:%f,%f,%f|\n", serverDeltaTime, i,
-            //        &players[i].playerNetState.position.x, &players[i].playerNetState.position.y,
-            //        &players[i].playerNetState.position.y);
+            offset += sprintf(broadcast_buffer + offset, "%lld:%f,%f,%f|", i,
+                              worldState.players[i].playerNetState.position.x,
+                              worldState.players[i].playerNetState.position.y,
+                              worldState.players[i].playerNetState.position.z);
         }
 
         if (offset > 0) {
             for (size_t i = 0; i < MAX_PLAYERS; i++) {
-                if (!players[i].isConnected) continue;
-                send(players[i].socket, broadcast_buffer, strlen(broadcast_buffer), 0);
+                if (!worldState.players[i].isConnected) continue;
+                send(worldState.players[i].socket, broadcast_buffer, strlen(broadcast_buffer), 0);
             }
         }
 
-        // Calculate next tick
         DWORD elapsed = GetTickCount() - start_time;
-        if (elapsed < TICK) {
-            Sleep(TICK - elapsed);
+        if (elapsed < worldState.tickPerMs) {
+            Sleep((DWORD)(worldState.tickPerMs - elapsed));
         }
     }
 
-    closesocket(server_fd);
-    WSACleanup();
+    closeConnection();
+    UnloadServerTerrainData();
     return 0;
 }
 
 double GetServerTimeSeconds(void) {
-    // static are created once, and keep their value
-    static LARGE_INTEGER frequency;  // processor frequency
+    static LARGE_INTEGER frequency;
     static bool initialized = false;
 
     if (!initialized) {
-        QueryPerformanceFrequency(&frequency);  // since server machine turned on (in millisec)
+        QueryPerformanceFrequency(&frequency);
         initialized = true;
     }
 
     LARGE_INTEGER counter;
     QueryPerformanceCounter(&counter);
 
-    // convert to double because: int / int = int
-    return (double)counter.QuadPart / (double)frequency.QuadPart;  // i.e. 1432.548291 (ms)
+    return (double)counter.QuadPart / (double)frequency.QuadPart;
 }
 
 void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
-    if (!netState->hasTarget) {
-        // printf("Player has not target\n");
-        return;
-    }
+    if (!netState->hasTarget) return;
 
     NetVec3 target = netState->targetPosition;
     NetVec3 position = netState->position;
-
-    NetVec3 toTarget =
-        (NetVec3){.x = target.x - position.x,
-                  .y = target.y - position.y,
-                  .z = target.z - position.z};  // this vector will point to position -> target
+    NetVec3 toTarget = (NetVec3){
+        .x = target.x - position.x,
+        .y = target.y - position.y,
+        .z = target.z - position.z,
+    };
 
     float toTargetLength =
         sqrt(toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z);
@@ -242,13 +190,15 @@ void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
         return;
     }
 
-    NetVec3 toTargetNormalized = (NetVec3){.x = toTarget.x / toTargetLength,
-                                           .y = toTarget.y / toTargetLength,
-                                           .z = toTarget.z / toTargetLength};
+    NetVec3 toTargetNormalized = (NetVec3){
+        .x = toTarget.x / toTargetLength,
+        .y = toTarget.y / toTargetLength,
+        .z = toTarget.z / toTargetLength,
+    };
 
     float distance = netState->velocity * delta;
 
-    if (distance >= toTargetLength) {  // avoid overshooting the target
+    if (distance >= toTargetLength) {
         printf("Avoid overshooting\n");
         netState->position = target;
         netState->velocity = 0.0f;
@@ -256,15 +206,24 @@ void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
         return;
     }
 
-    NetVec3 toMove = (NetVec3){// allowed movement
-                               .x = toTargetNormalized.x * distance,
-                               .y = toTargetNormalized.y * distance,
-                               .z = toTargetNormalized.z * distance};
+    NetVec3 toMove = (NetVec3){
+        .x = toTargetNormalized.x * distance,
+        .y = toTargetNormalized.y * distance,
+        .z = toTargetNormalized.z * distance,
+    };
 
     netState->position.x += toMove.x;
     netState->position.y += toMove.y;
     netState->position.z += toMove.z;
+}
 
-    // printf("%d, %f, %f \n", netState->position.x, netState->position.y, netState->position.z);
-    // printf("Movement has been calulated\n");
+void load_server_terrain_data() {
+    parse_server_json();
+    worldState.terrainData = GetServerTerrainData();
+    if (worldState.terrainData == NULL || worldState.terrainData->chunkCount <= 0) {
+        printf("Terrain heightmaps are not loaded. Exit\n");
+        exit(1);
+    }
+
+    printf("Loaded %d terrain chunk(s)\n", worldState.terrainData->chunkCount);
 }

@@ -5,10 +5,10 @@ CC = gcc
 TARGET = server.exe
 
 # Source files
-SRC = main.c $(wildcard src/*.c) $(wildcard ../shared/src/*.c)
+SRC = main.c $(wildcard src/*.c) $(wildcard ../shared/src/*.c) ../client/src/cJSON.c
 
 # Compiler flags
-CFLAGS = -O1 -Wall -std=c99 -Wno-missing-braces -Iinclude -I../shared/include
+CFLAGS = -O1 -Wall -std=c99 -Wno-missing-braces -Iinclude -I../shared/include -I../client/include
 
 # Linker flags
 LDFLAGS = -Llib -lraylib -lopengl32 -lgdi32 -lws2_32 -lwinmm -ggdb

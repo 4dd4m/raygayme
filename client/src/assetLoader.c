@@ -6,9 +6,9 @@
 #include <string.h>
 #include <world.h>
 
-#include "file_io.h"
 #include "assetLoader.h"
 #include "cJSON.h"
+#include "file_io.h"
 #include "raymath.h"
 
 #define HERE printf("<><>><<>><><> I AM HERE ><><><><><><><><\n");
