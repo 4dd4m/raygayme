@@ -20,29 +20,10 @@ $commonFlags = @(
     "-g"
 )
 
-# Generate compile_commands.json for clangd
-$compileCommands = foreach ($sourceFile in $sourceFiles) {
-    $arguments = @(
-        $commonFlags
-        "-c"
-        $sourceFile
-    )
-
-    @{
-        directory = $projectDirectory
-        file      = $sourceFile
-        arguments = @($compiler) + $arguments
-    }
-}
-
-$compileCommands |
-ConvertTo-Json -Depth 5 |
-Set-Content -Path "compile_commands.json" -Encoding UTF8
-
 # Build executable
 $buildArguments = @(
     $sourceFiles
-    "-o", "game.exe"
+    "-o", "bin/game.exe"
     $commonFlags
     "-L", (Join-Path $projectDirectory "lib")
     "-lraylib"
@@ -67,4 +48,4 @@ if ($LASTEXITCODE -ne 0) {
 
 # Run and save output to log.txt
 #cmd /c ".\game.exe 2>&1" | Tee-Object -FilePath "log.txt"
-cmd /c ".\game.exe"
+cmd /c ".\bin\game.exe"
