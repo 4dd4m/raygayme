@@ -1,5 +1,7 @@
 client/game.exe
 server/server.exe
+client/bin
+server/bin
 server/log.txt
 client.log.txt
 .agents/
