@@ -2,7 +2,7 @@
 CC = gcc
 
 # Target
-TARGET = game.exe
+TARGET = server.exe
 
 # Source files
 SRC = main.c $(wildcard src/*.c) $(wildcard ../shared/src/*.c)

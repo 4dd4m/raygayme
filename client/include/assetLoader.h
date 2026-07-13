@@ -17,4 +17,3 @@ void UnloadAsset(AssetId id);
 void UnloadAllAssets();
 WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount);
 
-char* LoadStaticObjectFile();

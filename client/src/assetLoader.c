@@ -6,6 +6,7 @@
 #include <string.h>
 #include <world.h>
 
+#include "file_io.h"
 #include "assetLoader.h"
 #include "cJSON.h"
 #include "raymath.h"
@@ -83,46 +84,8 @@ static AssetId GetAssetIdFromString(const char* id, const char* type) {
     return ASSET_COUNT;
 }
 
-char* LoadStaticObjectFile() {
-    FILE* file = fopen("assets/objects.json", "r");
-
-    if (!file) {
-        perror("Error opening static objects file");
-        return NULL;
-    }
-
-    // check file length
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    if (length <= 0) {
-        perror("Object file size problem");
-        fclose(file);
-        return NULL;
-    }
-
-    // allocate memory
-    char* buffer = malloc(length + 1);
-    if (!buffer) {
-        fclose(file);
-        perror("Memory allocation has been failed");
-        return NULL;
-    }
-
-    // read file into the buffer
-    size_t read_size = fread(buffer, 1, length, file);
-    buffer[read_size] = '\0';
-
-    if (Debug) printf("!!! Static File Json has been loaded with a size of %lld\n", read_size);
-
-    fclose(file);
-
-    return buffer;
-}
-
 WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
-    char* fileContent = LoadStaticObjectFile();
+    char* fileContent = LoadFile("assets/objects.json");
     WorldObject* worldObjects = NULL;
     int objectCount = 0;
     int i = 0;

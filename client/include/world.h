@@ -1,5 +1,5 @@
 #pragma once
-#include "../../shared/player_state.h"
+#include "player_state.h"
 #include "assetLoader.h"
 #include "raylib.h"
 

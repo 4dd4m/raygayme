@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <windows.h>
 
-#include "../shared/player_state.h"
+#include "player_state.h"
 
 #define PORT 9999
 #define MAX_PLAYERS 10
@@ -74,7 +74,6 @@ int main() {
         // the code will not wait here for connections. If no one wants to connect, just pass
 
         if (new_socket != INVALID_SOCKET) {
-            int newPlayerSlot = 0;
             bool slot_found = false;
             ioctlsocket(new_socket, FIONBIO, &mode);
 
@@ -99,7 +98,7 @@ int main() {
                     // New Connection so send back the Id
                     char welcomeBuffer[100];
 
-                    sprintf(welcomeBuffer, "WELCOME|%d|%f,%f,%f\n", i,
+                    sprintf(welcomeBuffer, "WELCOME|%llu|%f,%f,%f\n", (unsigned long long)i,
                             players[i].playerNetState.position.x,
                             players[i].playerNetState.position.y,
                             players[i].playerNetState.position.z);

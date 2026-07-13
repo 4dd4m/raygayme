@@ -1,0 +1,6 @@
+#ifndef CLIENT_CSTDIO_COMPAT_H
+#define CLIENT_CSTDIO_COMPAT_H
+
+#include <stdio.h>
+
+#endif
