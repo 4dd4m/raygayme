@@ -118,18 +118,32 @@ int main() {
 
             if (valread > 0) {           // if something read from the player
                 buffer[valread] = '\0';  // terminating the buffer
-                sscanf(buffer, "%f, %f, %f", &players[i].playerNetState.position.x,
-                       &players[i].playerNetState.position.y, &players[i].playerNetState.position.y);
-
-                printf("%d: Player has been moved! ID: %lld\n", ++n, i);
+                if (sscanf(buffer, "MOVE|%d|%f, %f, %f", &players[i].playerNetState.id,
+                           &players[i].playerNetState.position.x,
+                           &players[i].playerNetState.position.y,
+                           &players[i].playerNetState.position.z) == 4) {
+                    printf("%d: Player has been moved! ID: %lld. X:%f, y:%f, z:%f\n", ++n, i,
+                           players[i].playerNetState.position.x,
+                           players[i].playerNetState.position.y,
+                           players[i].playerNetState.position.z);
+                }
 
                 players[i].lastInputTime = GetServerTimeSeconds();
+            } else if (valread == 0) {
+                printf("%d: Player has been disconnected gracefully! ID: %lld\n", ++n, i);
             }
             // nothing read from the player or player connection is not present
-            else if (valread == 0 ||
-                     (valread == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)) {
-                printf("%d: Player has been disconnected! ID: %lld\n", ++n, i);
-                players[i].isConnected = false;
+            else {
+                int error = WSAGetLastError();
+
+                if (error == WSAEWOULDBLOCK) {
+                    // no buffer data
+                    continue;
+                } else {
+                    printf("%d: Player connection has been lost! ID: %lld\n", ++n, i);
+                    closesocket(players[i].socket);
+                    players[i].isConnected = false;
+                }
             }
         }
 

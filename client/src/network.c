@@ -51,7 +51,19 @@ bool Network_Init(const char* ip, int port) {
     return true;
 }
 
-void Network_SendData(float x, float y, float z) {}
+void Network_SendMovement(int playerId, NetVec3 target) {
+    if (client_socket == INVALID_SOCKET) return;
+
+    char sendBuffer[2048];
+    int bytes = snprintf(sendBuffer, sizeof(sendBuffer), "MOVE|%d|%f,%f,%f", playerId, target.x,
+                         target.y, target.z);
+
+    if (bytes < 0) return;
+
+    send(client_socket, sendBuffer, (int)strlen(sendBuffer), 0);
+
+    printf("[Network]: MOVE|%d|%f,%f,%f\n", playerId, target.x, target.y, target.z);
+}
 
 void Network_ReceiveData(PlayerNetState* world_players, PlayerNetState* player) {
     if (client_socket == INVALID_SOCKET) return;

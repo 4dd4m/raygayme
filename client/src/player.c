@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "network.h"
 #include "raymath.h"
 
 char playerBuffer[128];
@@ -45,6 +46,9 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
                     isInteractiveClicked = true;
                     player->hasTarget = true;
                     player->targetLocation = world->worldObjects[i].position;
+                    Network_SendMovement(
+                        player->id, (NetVec3){player->targetLocation.x, player->targetLocation.y,
+                                              player->targetLocation.z});
                     break;
                 }
             }
@@ -57,6 +61,9 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
                 if (hit.hit) {
                     player->targetLocation = hit.point;
                     player->hasTarget = true;
+                    Network_SendMovement(
+                        player->id, (NetVec3){player->targetLocation.x, player->targetLocation.y,
+                                              player->targetLocation.z});
                 } else {
                     player->hasTarget = false;
                     player->targetLocation = (Vector3){0};
