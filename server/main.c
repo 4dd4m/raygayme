@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <winsock2.h>
 //
+#include <math.h>
 #include <stdbool.h>
 #include <windows.h>
 
@@ -8,7 +9,7 @@
 
 #define PORT 9999
 #define MAX_PLAYERS 10
-#define TICK 33
+#define TICK 33  // tick duration in a sec
 
 typedef struct ServerPlayer {
     PlayerNetState playerNetState;
@@ -22,10 +23,13 @@ typedef struct ServerPlayer {
 ServerPlayer players[MAX_PLAYERS];
 
 double GetServerTimeSeconds(void);
+void UpdatePlayerPosition(PlayerNetState* netState, float delta);
 
 int n = 0;
 
 int main() {
+    double lastTime = GetServerTimeSeconds();  // base for delta calculation
+    float serverDeltaTime = 0.0f;
     // turn terminal buffering off
     setvbuf(stdout, NULL, _IONBF, 0);
     // windows specific, just access to the networking layer
@@ -55,6 +59,10 @@ int main() {
     printf("Server Up!\n");
 
     while (1) {  // main server loop
+        double now = GetServerTimeSeconds();
+        serverDeltaTime = now - lastTime;
+        lastTime = now;
+
         DWORD start_time =
             GetTickCount();  // get sytstem time to calcualte processTime - tick = nextTick
 
@@ -77,16 +85,28 @@ int main() {
                     players[i].socket = new_socket;
                     players[i].playerNetState.id = i;
                     players[i].playerNetState.position = (NetVec3){0, 0, -17.38};
-                    players[i].playerNetState.velocity = (NetVec3){0};
+                    players[i].playerNetState.velocity = 0;
                     players[i].playerNetState.moveState = PLAYER_MOVE_IDLE;
                     players[i].playerNetState.yaw = 0.0f;
+                    players[i].playerNetState.hasTarget = 0.0f;
 
                     players[i].isConnected = true;
 
                     players[i].lastPacketTime = GetServerTimeSeconds();
                     players[i].lastInputTime = GetServerTimeSeconds();
-                    newPlayerSlot = i;
                     printf("%d: Player has been connected! ID: %lld\n", ++n, i);
+
+                    // New Connection so send back the Id
+                    char welcomeBuffer[100];
+
+                    sprintf(welcomeBuffer, "WELCOME|%d|%f,%f,%f\n", i,
+                            players[i].playerNetState.position.x,
+                            players[i].playerNetState.position.y,
+                            players[i].playerNetState.position.z);
+
+                    printf(welcomeBuffer);
+
+                    send(new_socket, welcomeBuffer, sizeof(welcomeBuffer), 0);
                     break;
                 }
             }
@@ -95,18 +115,6 @@ int main() {
                 printf("%d: Server is full\n", n);
                 closesocket(new_socket);
             }
-
-            // New Connection so send back the Id
-            char welcomeBuffer[100];
-
-            sprintf(welcomeBuffer, "WELCOME|%d|%f,%f,%f\n", newPlayerSlot,
-                    players[newPlayerSlot].playerNetState.position.x,
-                    players[newPlayerSlot].playerNetState.position.y,
-                    players[newPlayerSlot].playerNetState.position.z);
-
-            printf(welcomeBuffer);
-
-            send(new_socket, welcomeBuffer, sizeof(welcomeBuffer), 0);
         }
 
         // Read incoming data
@@ -118,14 +126,17 @@ int main() {
 
             if (valread > 0) {           // if something read from the player
                 buffer[valread] = '\0';  // terminating the buffer
-                if (sscanf(buffer, "MOVE|%d|%f, %f, %f", &players[i].playerNetState.id,
-                           &players[i].playerNetState.position.x,
-                           &players[i].playerNetState.position.y,
-                           &players[i].playerNetState.position.z) == 4) {
-                    printf("%d: Player has been moved! ID: %lld. X:%f, y:%f, z:%f\n", ++n, i,
-                           players[i].playerNetState.position.x,
-                           players[i].playerNetState.position.y,
-                           players[i].playerNetState.position.z);
+                if (sscanf(buffer, "MOVE|%d|%f,%f,%f", &players[i].playerNetState.id,
+                           &players[i].playerNetState.targetPosition.x,
+                           &players[i].playerNetState.targetPosition.y,
+                           &players[i].playerNetState.targetPosition.z) == 4) {
+                    printf("%d: Player %lld asks to move to: X:%f, y:%f, z:%f\n", ++n, i,
+                           players[i].playerNetState.targetPosition.x,
+                           players[i].playerNetState.targetPosition.y,
+                           players[i].playerNetState.targetPosition.z);
+
+                    players[i].playerNetState.hasTarget = true;
+                    players[i].playerNetState.velocity = 3.0f;
                 }
 
                 players[i].lastInputTime = GetServerTimeSeconds();
@@ -147,6 +158,12 @@ int main() {
             }
         }
 
+        for (size_t i = 0; i < MAX_PLAYERS; i++) {
+            if (!players[i].isConnected) continue;
+
+            UpdatePlayerPosition(&players[i].playerNetState, serverDeltaTime);
+        }
+
         // BROADCAST WORLD STATE
         char broadcast_buffer[2048] = "";
         int offset = 0;
@@ -154,10 +171,15 @@ int main() {
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
             if (!players[i].isConnected) continue;
 
-            offset +=
-                sprintf(broadcast_buffer + offset, "%lld:%f,%f,%f|", i,
-                        &players[i].playerNetState.position.x, &players[i].playerNetState.position.y,
-                        &players[i].playerNetState.position.y);
+            offset += sprintf(broadcast_buffer + offset, "SNAPSHOT|");
+
+            offset += sprintf(
+                broadcast_buffer + offset, "%lld:%f,%f,%f|", i, players[i].playerNetState.position.x,
+                players[i].playerNetState.position.y, players[i].playerNetState.position.z);
+
+            // printf("%f - SNAPSHOT|%lld:%f,%f,%f|\n", serverDeltaTime, i,
+            //        &players[i].playerNetState.position.x, &players[i].playerNetState.position.y,
+            //        &players[i].playerNetState.position.y);
         }
 
         if (offset > 0) {
@@ -190,8 +212,60 @@ double GetServerTimeSeconds(void) {
     }
 
     LARGE_INTEGER counter;
-    QueryPerformanceFrequency(&counter);
+    QueryPerformanceCounter(&counter);
 
     // convert to double because: int / int = int
     return (double)counter.QuadPart / (double)frequency.QuadPart;  // i.e. 1432.548291 (ms)
+}
+
+void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
+    if (!netState->hasTarget) {
+        // printf("Player has not target\n");
+        return;
+    }
+
+    NetVec3 target = netState->targetPosition;
+    NetVec3 position = netState->position;
+
+    NetVec3 toTarget =
+        (NetVec3){.x = target.x - position.x,
+                  .y = target.y - position.y,
+                  .z = target.z - position.z};  // this vector will point to position -> target
+
+    float toTargetLength =
+        sqrt(toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z);
+
+    if (toTargetLength < 0.001f) {
+        printf("Player toTargetLength too small\n");
+        netState->position = target;
+        netState->velocity = 0.0f;
+        netState->hasTarget = false;
+        return;
+    }
+
+    NetVec3 toTargetNormalized = (NetVec3){.x = toTarget.x / toTargetLength,
+                                           .y = toTarget.y / toTargetLength,
+                                           .z = toTarget.z / toTargetLength};
+
+    float distance = netState->velocity * delta;
+
+    if (distance >= toTargetLength) {  // avoid overshooting the target
+        printf("Avoid overshooting\n");
+        netState->position = target;
+        netState->velocity = 0.0f;
+        netState->hasTarget = false;
+        return;
+    }
+
+    NetVec3 toMove = (NetVec3){// allowed movement
+                               .x = toTargetNormalized.x * distance,
+                               .y = toTargetNormalized.y * distance,
+                               .z = toTargetNormalized.z * distance};
+
+    netState->position.x += toMove.x;
+    netState->position.y += toMove.y;
+    netState->position.z += toMove.z;
+
+    // printf("%d, %f, %f \n", netState->position.x, netState->position.y, netState->position.z);
+    // printf("Movement has been calulated\n");
 }
