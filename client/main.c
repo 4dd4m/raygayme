@@ -83,6 +83,7 @@ void UpdateClient(Client* client) {
 
         case CLIENT_STATE_IN_GAME:
             Network_ReceiveData(client->world.players, &client->localPlayerNetState);
+            UpdatePlayerPosition(&client->player, &client->localPlayerNetState);
             UpdateMyCameraState(&client->Camera, &client->player);
             UpdateWorld(&client->world);
             UpdatePlayer(&client->player, &client->Camera, &client->world);

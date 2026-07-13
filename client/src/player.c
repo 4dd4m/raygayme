@@ -23,6 +23,10 @@ void InitPlayer(Player* player) {
 void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
     bool isInteractiveClicked = false;
 
+    player->boundingBox = (BoundingBox){
+        .min = {player->position.x - 0.5f, player->position.y, player->position.z - 0.5f},
+        .max = {player->position.x + 0.5f, player->position.y + 1.7f, player->position.z + 0.5f}};
+
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         player->ray = GetScreenToWorldRay(GetMousePosition(), camera->Camera);
 
@@ -92,10 +96,6 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
             nextPos.y = GetHeightFromMesh(world->activeChunk->model.meshes[0],
                                           world->activeChunk->model.transform, nextPos.x, nextPos.z);
 
-            player->boundingBox =
-                (BoundingBox){.min = {nextPos.x - 0.5f, nextPos.y, nextPos.z - 0.5f},
-                              .max = {nextPos.x + 0.5f, nextPos.y + 1.7f, nextPos.z + 0.5f}};
-
             player->isColliding = false;
 
             // check collision agains world objects
@@ -112,7 +112,7 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
             }
 
             if (!player->isColliding) {
-                player->position = nextPos;
+                // player->position = nextPos;
             }
         }
     }

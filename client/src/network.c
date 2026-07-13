@@ -116,24 +116,39 @@ void ParseWelcome(char* buffer, PlayerNetState* world_players, PlayerNetState* l
 void ParseSnapShot(char* buffer, PlayerNetState* world_players,
                    PlayerNetState* localPlayerNetState) {
     // change everybody to offline
+
     for (size_t i = 0; i < MAX_PLAYERS; i++) {
         remote_players[i].isConnected = false;
+    }
 
-        char* token = strtok(buffer, "|");
+    char* token = strtok(buffer, "|");
 
-        while (token != NULL) {
-            int id;
-            float x, y, z;
+    while (token != NULL) {
+        if (strcmp(token, "SNAPSHOT") == 0) {
+            token = strtok(NULL, "|");
+            continue;
+        }
 
-            if (sscanf(token, "%d:%f,%f,%f", &id, &x, &y, &z) == 4) {
-                if (id >= 0 && id < MAX_PLAYERS) {
+        int id;
+        float x, y, z;
+
+        if (sscanf(token, "%d:%f,%f,%f", &id, &x, &y, &z) == 4) {
+            if (id >= 0 && id < MAX_PLAYERS) {
+                if (id == localPlayerNetState->id) {  // it is me
+                    localPlayerNetState->position.x = x;
+                    localPlayerNetState->position.y = y;
+                    localPlayerNetState->position.z = z;
+                    localPlayerNetState->isConnected = true;
+                    printf("self update\n");
+                } else {
                     remote_players[id].id = id;
-
                     remote_players[id].position = (NetVec3){x, y, z};
                     remote_players[id].isConnected = true;
                 }
+
+                // printf(token, "%d:%f,%f,%f\n", id, x, y, z);
             }
-            token = strtok(NULL, "|");
         }
+        token = strtok(NULL, "|");
     }
 }
