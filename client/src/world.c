@@ -10,11 +10,17 @@
 #define LIGHT_DISTANCE 25.0f
 #define LIGHT_ORTHO_SIZE 20.0f
 #define SHOW_COLLISIONS true
+#define CHUNK_WORLD_SIZE 100.0f
 
 static void SetModelShader(Model* model, Shader shader) {
     for (int i = 0; i < model->materialCount; i++) {
         model->materials[i].shader = shader;
     }
+}
+
+static Vector3 GetChunkWorldPosition(const Chunk* chunk) {
+    return (Vector3){chunk->coord.x * CHUNK_WORLD_SIZE, chunk->coord.y,
+                     chunk->coord.z * CHUNK_WORLD_SIZE};
 }
 
 static void UpdateLightView(World* world) {
@@ -33,35 +39,50 @@ static void UpdateLightView(World* world) {
     world->lightViewProj = MatrixMultiply(lightProj, lightView);
 }
 
-void InitWorld(World* world) {
+void InitWorld(World* world, ServerVec2i chunkCoord) {
     // printf("### Initializing World\n");
     world->chunkCount = 0;
 
-    // load starting chunk
-    Chunk* chunk = &world->chunks[0];
-    chunk->coord.x = 0;
-    chunk->coord.y = 0;
-    chunk->coord.z = 0;
-    chunk->objects = NULL;
-    chunk->objectCount = 0;
-    chunk->collisions = NULL;
-    chunk->collisionCount = 0;
-    chunk->isActive = true;
+    Chunk* chunk = &world->chunks[world->chunkCount];
 
-    chunk->model = LoadModel("assets/chunks/TERRAIN.glb");
+    int i = LoadChunkByCoords(chunk, chunkCoord);
+    if (i == 0) {
+        printf("Active chunk cannot be loaded");
+        return;
+    }
+
     world->chunkCount = 1;
     world->activeChunk = chunk;
+
+    ServerVec2i neighbours[8];
+    int neighbourCount = GetNeighbourChunkCoords(chunkCoord, neighbours);
+
+    for (int neighbourIndex = 0; neighbourIndex < neighbourCount; neighbourIndex++) {
+        if (world->chunkCount >= MAX_CHUNKS) {
+            break;
+        }
+
+        Chunk* neighbourChunk = &world->chunks[world->chunkCount];
+        if (LoadChunkByCoords(neighbourChunk, neighbours[neighbourIndex])) {
+            world->chunkCount++;
+        }
+    }
+
     world->activeChunk->collisionCount = 0;
-    world->worldObjects = LoadStaticAssetsForChunk(0, &world->worldObjectCount);
+    world->worldObjects = LoadChunkAssetsByCoords(chunkCoord, &world->worldObjectCount);
+
+    printf("%d chunks loaded\n", world->chunkCount);
+    printf("%d world object loaded\n", world->worldObjectCount);
 
     // SET Shaders
 
-    world->shadowShader = LoadShader("assets/shaders/shadow.vs", "assets/shaders/shadow.fs");
+    world->shadowShader = LoadShader("../assets/shaders/shadow.vs", "../assets/shaders/shadow.fs");
     world->shadowDepthShader =
-        LoadShader("assets/shaders/shadow_depth.vs", "assets/shaders/shadow_depth.fs");
+        LoadShader("../assets/shaders/shadow_depth.vs", "../assets/shaders/shadow_depth.fs");
 
     // outline shader
-    world->outlineShader = LoadShader("assets/shaders/outline.vs", "assets/shaders/outline.fs");
+    world->outlineShader =
+        LoadShader("../assets/shaders/outline.vs", "../assets/shaders/outline.fs");
     world->outlineShader.locs[SHADER_LOC_MATRIX_MVP] =
         GetShaderLocation(world->outlineShader, "mvp");
     world->outlineColorLoc = GetShaderLocation(world->outlineShader, "outlineColor");
@@ -97,7 +118,9 @@ void InitWorld(World* world) {
     UpdateLightView(world);
 
     SetShaderValueTexture(world->shadowShader, world->shadowMapLoc, world->shadowMap.texture);
-    SetModelShader(&world->activeChunk->model, world->shadowShader);
+    for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
+        SetModelShader(&world->chunks[chunkIndex].model, world->shadowShader);
+    }
     if (world->worldObjects && world->worldObjectCount > 0) {
         for (int i = 0; i < world->worldObjectCount; i++) {
             if (world->worldObjects[i].model) {
@@ -116,11 +139,11 @@ void RenderWorldShadowMap(World* world) {
     ClearBackground(WHITE);
     BeginMode3D(world->lightCamera);
 
-    SetModelShader(&world->activeChunk->model, world->shadowDepthShader);
-    DrawModel(world->activeChunk->model,
-              (Vector3){world->activeChunk->coord.x, world->activeChunk->coord.y,
-                        world->activeChunk->coord.z},
-              1.0f, WHITE);
+    for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
+        Chunk* chunk = &world->chunks[chunkIndex];
+        SetModelShader(&chunk->model, world->shadowDepthShader);
+        DrawModel(chunk->model, GetChunkWorldPosition(chunk), 1.0f, WHITE);
+    }
     if (world->worldObjects && world->worldObjectCount > 0) {
         for (int i = 0; i < world->worldObjectCount; i++) {
             WorldObject obj = world->worldObjects[i];
@@ -131,7 +154,9 @@ void RenderWorldShadowMap(World* world) {
             }
         }
     }
-    SetModelShader(&world->activeChunk->model, world->shadowShader);
+    for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
+        SetModelShader(&world->chunks[chunkIndex].model, world->shadowShader);
+    }
 
     EndMode3D();
     EndTextureMode();
@@ -166,10 +191,10 @@ void DrawWorld(World* world, Camera3D camera) {
     }
 
     // draw terrain
-    DrawModel(
-        world->chunks[0].model,
-        (Vector3){world->chunks[0].coord.x, world->chunks[0].coord.y, world->chunks[0].coord.z},
-        1.0f, GRAY);
+    for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
+        Chunk* chunk = &world->chunks[chunkIndex];
+        DrawModel(chunk->model, GetChunkWorldPosition(chunk), 1.0f, GRAY);
+    }
 
     // draw all world objects
     for (int i = 0; i < world->worldObjectCount; i++) {
@@ -232,3 +257,7 @@ void ShutdownWorld(World* world) {
 
     free(world->worldObjects);
 }
+
+
+
+

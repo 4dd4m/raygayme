@@ -18,11 +18,11 @@
 Asset Assets[ASSET_COUNT] = {0};
 
 char* AssetPath[ASSET_COUNT] = {
-    "assets/chunks/TERRAIN.glb",
-    "assets/assets/ASSET_TREE.glb",
-    "assets/assets/ASSET_TREE_TRUNK.glb",
-    "assets/assets/ASSET_ROCK.glb",
-    "assets/collisions/COLLISION_TREE.glb",
+    "../assets/chunks/TERRAIN.glb",
+    "../assets/assets/ASSET_TREE.glb",
+    "../assets/assets/ASSET_TREE_TRUNK.glb",
+    "../assets/assets/ASSET_ROCK.glb",
+    "../assets/collisions/COLLISION_TREE.glb",
 };
 
 Asset* GetAsset(AssetId id) {
@@ -84,8 +84,70 @@ static AssetId GetAssetIdFromString(const char* id, const char* type) {
     return ASSET_COUNT;
 }
 
+Model LoadTerrainModelByCoords(ServerVec2i coords) {
+    int length = snprintf(NULL, 0, "../assets/chunks/CHUNK_%d_%d.glb", coords.x, coords.z);
+    if (length <= 0) {
+        return (Model){0};
+    }
+
+    char* fileNameBuffer = calloc((size_t)length + 1u, 1u);
+    if (fileNameBuffer == NULL) {
+        return (Model){0};
+    }
+
+    int written = snprintf(fileNameBuffer, (size_t)length + 1u,
+                           "../assets/chunks/CHUNK_%d_%d.glb", coords.x, coords.z);
+    if (written != length) {
+        free(fileNameBuffer);
+        return (Model){0};
+    }
+
+    Model model = LoadModel(fileNameBuffer);
+    free(fileNameBuffer);
+
+    return model;
+}
+
+int LoadChunkByCoords(Chunk* chunk, ServerVec2i coords) {
+    if (chunk == NULL) {
+        return 0;
+    }
+
+    Model model = LoadTerrainModelByCoords(coords);
+    if (model.meshCount <= 0) {
+        return 0;
+    }
+
+    *chunk = (Chunk){.coord = (ChunkCoord){.x = coords.x, .z = coords.z, .y = 0},
+                     .model = model,
+                     .mesh = {0},
+                     .objects = NULL,
+                     .collisions = NULL,
+                     .objectCount = 0,
+                     .collisionCount = 0,
+                     .isActive = true};
+
+    return 1;
+}
+
+int GetNeighbourChunkCoords(ServerVec2i current, ServerVec2i* out) {
+    out[0] = (ServerVec2i){.x = current.x - 1, .z = current.z - 1};  // top left
+    out[1] = (ServerVec2i){.x = current.x, .z = current.z - 1};      // top top
+    out[2] = (ServerVec2i){.x = current.x + 1, .z = current.z - 1};  // top right
+    out[3] = (ServerVec2i){.x = current.x - 1, .z = current.z};      // left left
+    out[4] = (ServerVec2i){.x = current.x + 1, .z = current.z};      // right right
+    out[5] = (ServerVec2i){.x = current.x - 1, .z = current.z + 1};  // bottom left
+    out[6] = (ServerVec2i){.x = current.x, .z = current.z + 1};      // bottom bottom
+    out[7] = (ServerVec2i){.x = current.x + 1, .z = current.z + 1};  // bottom right
+    return 8;
+}
+
+WorldObject* LoadChunkAssetsByCoords(ServerVec2i coords, int* worldObjectCount) {
+    return LoadStaticAssetsForChunk(coords.x, worldObjectCount);
+}
+
 WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
-    char* fileContent = LoadFile("assets/objects.json");
+    char* fileContent = LoadFile("../assets/objects.json");
     WorldObject* worldObjects = NULL;
     int objectCount = 0;
     int i = 0;
@@ -178,16 +240,24 @@ WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
 
         if (cJSON_IsNumber(type)) {
             parsedType = type->valueint;
-        } else if (cJSON_IsString(type) && chunk->valuestring != NULL) {
+        } else if (cJSON_IsString(type) && type->valuestring != NULL) {
             parsedType = atoi(type->valuestring);
         } else {
+            goto error;
+        }
+
+        if (parsedChunk != chunkId) {
+            continue;
+        }
+
+        if (parsedType < 0 || parsedType >= ASSET_COUNT) {
             goto error;
         }
 
         if (Debug) printf("TYPEID: %d", parsedType);
 
         // calculate WorldObjectTransform
-        Model* model = &(GetAsset(type->valueint)->model);
+        Model* model = &(GetAsset((AssetId)parsedType)->model);
         Matrix transform =
             MatrixMultiply(model->transform, MatrixTranslate(position.x, position.y, position.z));
 
@@ -232,5 +302,10 @@ error:
     if (fileContent) free(fileContent);
     if (json) cJSON_Delete(json);
     if (worldObjects) free(worldObjects);
+    if (worldObjectCount) *worldObjectCount = 0;
     return NULL;
 }
+
+
+
+

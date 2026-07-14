@@ -1,0 +1,30 @@
+{
+    "id": "Chunk_-1_1",
+    "coord": [
+        -1,
+        1
+    ],
+    "heightFormat": "float32-le",
+    "heightOrder": "z-major: heights[z * gridWidth + x]",
+    "origin": [
+        -150.0,
+        -2.2614669799804688,
+        50.0
+    ],
+    "gridWidth": 55,
+    "gridDepth": 55,
+    "cellSizeX": 2.2727199999999925,
+    "cellSizeZ": 2.272730000000003,
+    "bounds": {
+        "min": [
+            -150.0,
+            -2.2614669799804688,
+            50.0
+        ],
+        "max": [
+            -50.0,
+            4.625317573547363,
+            150.0
+        ]
+    }
+}

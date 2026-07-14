@@ -16,6 +16,7 @@ typedef struct Player {
     bool drawCollisionBox;
     BoundingBox boundingBox;
     bool isColliding;
+    ServerVec2i chunkCoord;
 } Player;
 
 typedef struct MyCamera MyCamera;

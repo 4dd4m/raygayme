@@ -11,12 +11,6 @@ typedef struct ServerVec3 {
     float z;
 } ServerVec3;
 
-typedef struct ServerTri {
-    int a;
-    int b;
-    int c;
-} ServerTri;
-
 typedef struct ServerTerrainBounds {
     ServerVec3 min;
     ServerVec3 max;
@@ -24,17 +18,13 @@ typedef struct ServerTerrainBounds {
 
 typedef struct ServerTerrainChunk {
     char* id;
+    char* heightFile;
     ServerVec2i coord;
     ServerVec3 origin;
     int gridWidth;
     int gridDepth;
     float cellSizeX;
     float cellSizeZ;
-    char* vertsSpace;
-    ServerVec3* verts;
-    int vertCount;
-    ServerTri* tris;
-    int triCount;
     float* heights;
     int heightCount;
     ServerTerrainBounds bounds;
@@ -46,5 +36,6 @@ typedef struct ServerTerrainData {
 } ServerTerrainData;
 
 const ServerTerrainData* GetServerTerrainData();
+ServerTerrainData* GetInitialTerrainData();
 void UnloadServerTerrainData();
-void parse_server_json();
+void LoadServerTerrainData();

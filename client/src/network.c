@@ -102,15 +102,20 @@ void Network_Shutdown(void) {
 void ParseWelcome(char* buffer, PlayerNetState* world_players, PlayerNetState* localPlayerNetState) {
     printf("Welcome received\n");
 
-    if (sscanf(buffer, "WELCOME|%d|%f,%f,%f\n", &localPlayerNetState->id,
+    if (sscanf(buffer, "WELCOME|%d|%f,%f,%f|%d,%d\n", &localPlayerNetState->id,
                &localPlayerNetState->position.x, &localPlayerNetState->position.y,
-               &localPlayerNetState->position.z) == 4) {
-        printf("Received ID: %d Player Coordinates: X:%f Y:%f Z:%f\n", localPlayerNetState->id,
-               localPlayerNetState->position.x, localPlayerNetState->position.y,
-               localPlayerNetState->position.z);
+               &localPlayerNetState->position.z, &localPlayerNetState->chunkCoord.x,
+               &localPlayerNetState->chunkCoord.z) == 6) {
+        printf("Received ID: %d Player Coordinates: X:%f Y:%f Z:%f|Chunk: %d,%d\n",
+               localPlayerNetState->id, localPlayerNetState->position.x,
+               localPlayerNetState->position.y, localPlayerNetState->position.z,
+               localPlayerNetState->chunkCoord.x, localPlayerNetState->chunkCoord.z);
+
+        localPlayerNetState->isConnected = true;
+    } else {
+        localPlayerNetState->isConnected = false;
     }
     // else uninitailized localPlayerNetState will put the player on 0.0.0
-    localPlayerNetState->isConnected = true;
 }
 
 void ParseSnapShot(char* buffer, PlayerNetState* world_players,
@@ -139,7 +144,7 @@ void ParseSnapShot(char* buffer, PlayerNetState* world_players,
                     localPlayerNetState->position.y = y;
                     localPlayerNetState->position.z = z;
                     localPlayerNetState->isConnected = true;
-                    printf("self update\n");
+                    // printf("self update\n");
                 } else {
                     remote_players[id].id = id;
                     remote_players[id].position = (NetVec3){x, y, z};

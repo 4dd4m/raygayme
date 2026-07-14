@@ -140,6 +140,8 @@ void UpdatePlayerPosition(Player* player, PlayerNetState* localPlayerNetState) {
     player->position.x = localPlayerNetState->position.x;
     player->position.y = localPlayerNetState->position.y;
     player->position.z = localPlayerNetState->position.z;
+    player->chunkCoord.x = localPlayerNetState->chunkCoord.x;
+    player->chunkCoord.z = localPlayerNetState->chunkCoord.z;
 }
 
 void MovePlayerOnTerrain(Player* player) {

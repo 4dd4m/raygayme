@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <winsock2.h>
 
-#include "serverAssetLoader.h"
+#include "terrainAssetLoader.h"
 
 #define MAX_PLAYERS 10
 
@@ -13,7 +13,6 @@ typedef struct ServerPlayer {
     bool isConnected;
     double lastPacketTime;
     double lastInputTime;
-
     ServerVec2i chunkCoord;  // the chunk's coord the player stands on {0,0}
     int chunkIndex;          // index for terrainDat->chunks, if none: -1
 } ServerPlayer;

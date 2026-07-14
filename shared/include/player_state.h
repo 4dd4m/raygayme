@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "terrainAssetLoader.h"
+
 typedef struct NetVec3 {
     float x;
     float y;
@@ -18,6 +20,7 @@ typedef struct PlayerNetState {
     int id;
     NetVec3 position;
     NetVec3 targetPosition;
+    ServerVec2i chunkCoord;
     float velocity;
     bool hasTarget;
     float yaw;

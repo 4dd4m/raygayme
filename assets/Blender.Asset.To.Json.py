@@ -1,6 +1,7 @@
 import bpy
 import json
 import os
+import struct
 import uuid
 
 objects = []
@@ -24,23 +25,25 @@ def to_game_coords(blender_vec):
 
 
 def get_chunk_coord(obj):
-    chunk = obj.get("chunk")
-    if chunk is not None:
-        if isinstance(chunk, str):
-            parts = chunk.replace(",", "_").split("_")
-            if len(parts) >= 2:
-                return [int(parts[-2]), int(parts[-1])]
-            return [int(chunk), 0]
-        try:
-            return [int(chunk[0]), int(chunk[1])]
-        except TypeError:
-            return [int(chunk), 0]
-
     parts = obj.name.split("_")
-    if len(parts) >= 3:
+    if obj.name.startswith("Chunk") and len(parts) >= 3:
         return [int(parts[-2]), int(parts[-1])]
 
-    return [0, 0]
+    return None
+
+
+def get_chunk_file_stem(obj):
+    coord = get_chunk_coord(obj)
+    if coord is None:
+        return None
+    return f"Chunk{coord[0]}_{coord[1]}"
+
+
+def get_chunk_model_file_name(obj):
+    coord = get_chunk_coord(obj)
+    if coord is None:
+        return None
+    return f"CHUNK_{coord[0]}_{coord[1]}.glb"
 
 
 def export_terrain_chunk(obj):
@@ -67,8 +70,6 @@ def export_terrain_chunk(obj):
             xs.append(x_key)
             zs.append(z_key)
 
-        tris = [[tri.vertices[0], tri.vertices[1], tri.vertices[2]] for tri in mesh.loop_triangles]
-
         unique_xs = sorted(set(xs))
         unique_zs = sorted(set(zs))
         grid_width = len(unique_xs)
@@ -77,11 +78,10 @@ def export_terrain_chunk(obj):
         heights = []
         for z in unique_zs:
             for x in unique_xs:
-                heights.append(heights_by_xz.get((x, z), 0.0))
+                heights.append(float(heights_by_xz.get((x, z), 0.0)))
 
         cell_size_x = unique_xs[1] - unique_xs[0] if grid_width > 1 else 0.0
         cell_size_z = unique_zs[1] - unique_zs[0] if grid_depth > 1 else 0.0
-        cell_size = cell_size_x if abs(cell_size_x - cell_size_z) < 0.0001 else [cell_size_x, cell_size_z]
 
         min_bounds = [
             min(v[0] for v in verts),
@@ -94,26 +94,44 @@ def export_terrain_chunk(obj):
             max(v[2] for v in verts),
         ]
 
-        grid_size = grid_width if grid_width == grid_depth else [grid_width, grid_depth]
+        base_output_path = os.path.dirname(bpy.data.filepath)
+        heightmaps_directory = os.path.join(base_output_path, "heightmaps")
+        os.makedirs(heightmaps_directory, exist_ok=True)
 
-        return {
+        chunk_file_stem = get_chunk_file_stem(obj)
+        if chunk_file_stem is None:
+            print(f"Skipped terrain chunk {obj.name}: expected name Chunk_x_z")
+            return None
+        height_file_name = f"{chunk_file_stem}.height"
+        json_file_name = f"{chunk_file_stem}.json"
+        height_output_path = os.path.join(heightmaps_directory, height_file_name)
+        json_output_path = os.path.join(heightmaps_directory, json_file_name)
+
+        with open(height_output_path, "wb") as f:
+            for height in heights:
+                f.write(struct.pack("<f", height))
+
+        height_map_data = {
             "id": obj.name,
             "coord": get_chunk_coord(obj),
+            "heightFormat": "float32-le",
+            "heightOrder": "z-major: heights[z * gridWidth + x]",
             "origin": [min_bounds[0], min_bounds[1], min_bounds[2]],
-            "gridSize": grid_size,
             "gridWidth": grid_width,
             "gridDepth": grid_depth,
-            "cellSize": cell_size,
-            "vertsSpace": "world",
-            "verts": verts,
-            "tris": tris,
-            "heights": heights,
-            "heightOrder": "z-major: heights[z * gridWidth + x]",
+            "cellSizeX": cell_size_x,
+            "cellSizeZ": cell_size_z,
             "bounds": {
                 "min": min_bounds,
                 "max": max_bounds,
-            },
+            }
         }
+
+        with open(json_output_path, "w", encoding="utf-8") as f:
+            json.dump(height_map_data, f, indent=4)
+
+        print(f"Exported terrain chunk '{obj.name}' to '{json_output_path}' and '{height_output_path}'")
+        return height_map_data
     finally:
         evaluated_obj.to_mesh_clear()
 
@@ -189,15 +207,7 @@ with open(objects_output_path, "w", encoding="utf-8") as f:
 
 print(f"Exported {len(objects)} objects to {objects_output_path}")
 
-terrain_output_path = os.path.join(
-    base_output_path,
-    "heighmaps.json"
-)
-
-with open(terrain_output_path, "w", encoding="utf-8") as f:
-    json.dump({"chunks": terrain_chunks}, f, indent=4)
-
-print(f"Exported {len(terrain_chunks)} terrain chunks to {terrain_output_path}")
+print(f"Exported {len(terrain_chunks)} terrain chunks")
 
 #------------------------------------------------------------------
 # Export one of each object
@@ -214,13 +224,14 @@ for obj in bpy.context.scene.objects:
     if object_type is None:
         raise TypeError(f"{obj.name} has no type property")
 
+    if object_type.startswith("TERRAIN"):
+        continue
+
     # One export per unique type
     if object_type in exported_types:
         continue
 
-    if object_type.startswith("TERRAIN"):
-        folder_name = "chunks"
-    elif object_type.startswith("ASSET"):
+    if object_type.startswith("ASSET"):
         folder_name = "assets"
     elif object_type.startswith("COLLISION"):
         folder_name = "collisions"
@@ -283,5 +294,79 @@ for obj in bpy.context.scene.objects:
         bpy.context.view_layer.update()
 
 print(f"Exported {len(exported_types)} unique object types")
+#------------------------------------------------------------------
+# Export every terrain chunk
+#------------------------------------------------------------------
 
+exported_chunk_count = 0
+
+for obj in bpy.context.scene.objects:
+    if obj.get("blenderOnly") is True:
+        continue
+
+    object_type = obj.get("type")
+
+    if object_type is None:
+        continue
+
+    if not object_type.startswith("TERRAIN"):
+        continue
+
+    output_directory = os.path.join(base_output_path, "chunks")
+    os.makedirs(output_directory, exist_ok=True)
+
+    chunk_model_file_name = get_chunk_model_file_name(obj)
+    if chunk_model_file_name is None:
+        print(f"Skipped terrain chunk {obj.name}: expected name Chunk_x_z")
+        continue
+
+    output_path = os.path.join(output_directory, chunk_model_file_name)
+
+    bpy.ops.object.select_all(action="DESELECT")
+
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+
+    original_location = obj.location.copy()
+    original_rotation = obj.rotation_euler.copy()
+    original_scale = obj.scale.copy()
+
+    try:
+        obj.location = (0.0, 0.0, 0.0)
+        obj.rotation_euler = (0.0, 0.0, 0.0)
+        obj.scale = (1.0, 1.0, 1.0)
+
+        bpy.context.view_layer.update()
+
+        bpy.ops.export_scene.gltf(
+            filepath=output_path,
+            export_format="GLB",
+            use_selection=True,
+            export_apply=True,
+            export_yup=True,
+            export_texcoords=True,
+            export_normals=True,
+            export_materials="EXPORT"
+        )
+
+        exported_chunk_count += 1
+
+        print(
+            f"Exported terrain chunk '{obj.name}' "
+            f"to '{output_path}'"
+        )
+
+    finally:
+        obj.location = original_location
+        obj.rotation_euler = original_rotation
+        obj.scale = original_scale
+        bpy.context.view_layer.update()
+
+print(f"Exported {exported_chunk_count} terrain chunk models")
 bpy.ops.wm.save_mainfile()
+
+
+
+
+
+

@@ -9,18 +9,22 @@
 
 #include "player_state.h"
 #include "server.h"
-#include "serverAssetLoader.h"
+#include "terrainAssetLoader.h"
 
 WorldState worldState = {0};
 
 double GetServerTimeSeconds(void);
 void UpdatePlayerPosition(PlayerNetState* netState, float delta);
-void load_server_terrain_data();
 
 int n = 0;
 
 int main() {
-    load_server_terrain_data();
+    worldState.terrainData = GetInitialTerrainData();
+    if (worldState.terrainData == NULL) {
+        printf("Initial terrain data load fail\n");
+        exit(1);
+    }
+
     double lastTime = GetServerTimeSeconds();
     worldState.serverDeltaTime = 0.0f;
     worldState.tickPerMs = 33;
@@ -60,15 +64,38 @@ int main() {
 
                     printf("%d: Player has been connected! ID: %lld\n", ++n, i);
 
-                    char welcomeBuffer[100];
-                    sprintf(welcomeBuffer, "WELCOME|%llu|%f,%f,%f\n", (unsigned long long)i,
+                    // ID|startXYZ|chunkX,chunkZ
+                    int length = snprintf(NULL, 0, "WELCOME|%d|%f,%f,%f|%d,%d\n", (int)i,
+                                          worldState.players[i].playerNetState.position.x,
+                                          worldState.players[i].playerNetState.position.y,
+                                          worldState.players[i].playerNetState.position.z,
+                                          worldState.players[i].chunkCoord.x,
+                                          worldState.players[i].chunkCoord.z);
+
+                    if (length > 0) {
+                        char* welcomeBuffer = malloc(length + 1);
+                        if (welcomeBuffer == NULL) {
+                            worldState.players[i].isConnected = false;
+                            break;
+                        }
+
+                        int written = snprintf(
+                            welcomeBuffer, length + 1, "WELCOME|%d|%f,%f,%f|%d,%d\n", (int)i,
                             worldState.players[i].playerNetState.position.x,
                             worldState.players[i].playerNetState.position.y,
-                            worldState.players[i].playerNetState.position.z);
+                            worldState.players[i].playerNetState.position.z,
+                            worldState.players[i].chunkCoord.x, worldState.players[i].chunkCoord.z);
 
-                    printf("%s", welcomeBuffer);
-                    send(new_socket, welcomeBuffer, strlen(welcomeBuffer), 0);
-                    break;
+                        if (written != length) {
+                            free(welcomeBuffer);
+                            worldState.players[i].isConnected = false;
+                            break;
+                        }
+
+                        send(new_socket, welcomeBuffer, strlen(welcomeBuffer), 0);
+                        free(welcomeBuffer);
+                        break;
+                    }
                 }
             }
 
@@ -97,6 +124,8 @@ int main() {
 
                     worldState.players[i].playerNetState.hasTarget = true;
                     worldState.players[i].playerNetState.velocity = 3.0f;
+                } else {
+                    worldState.players[i].isConnected = false;
                 }
 
                 worldState.players[i].lastInputTime = GetServerTimeSeconds();
@@ -215,15 +244,4 @@ void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
     netState->position.x += toMove.x;
     netState->position.y += toMove.y;
     netState->position.z += toMove.z;
-}
-
-void load_server_terrain_data() {
-    parse_server_json();
-    worldState.terrainData = GetServerTerrainData();
-    if (worldState.terrainData == NULL || worldState.terrainData->chunkCount <= 0) {
-        printf("Terrain heightmaps are not loaded. Exit\n");
-        exit(1);
-    }
-
-    printf("Loaded %d terrain chunk(s)\n", worldState.terrainData->chunkCount);
 }

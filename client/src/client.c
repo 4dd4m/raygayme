@@ -33,7 +33,7 @@ void InitClientWindow(Client* client) {
 }
 
 void InitPLayerWorldCamera(Client* client) {
-    InitWorld(&client->world);
+    InitWorld(&client->world, client->player.chunkCoord);
     InitCamera(&client->Camera, &client->player);
 }
 
@@ -45,3 +45,4 @@ void DestroyClient(Client* client) {
     free(client->renderConfig);
     free(client);
 }
+

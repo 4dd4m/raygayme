@@ -1,6 +1,6 @@
 #pragma once
-#include "player_state.h"
 #include "assetLoader.h"
+#include "player_state.h"
 #include "raylib.h"
 
 typedef struct WorldObject {
@@ -79,7 +79,7 @@ typedef struct World {
     PlayerNetState players[MAX_PLAYERS];
 } World;
 
-void InitWorld(World* world);
+void InitWorld(World* world, ServerVec2i chunkCoord);
 void UpdateWorld(World* world);
 void DrawWorld(World* world, Camera3D camera);
 void RenderWorldShadowMap(World* world);
