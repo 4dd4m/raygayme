@@ -32,6 +32,9 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
 
         // if clicked and the ray has > 0.f
         if (fabsf(player->ray.direction.y) > 0.0001f) {
+            //
+            // checking if we hitting interactive object
+            //
             for (int i = 0; i < world->worldObjectCount; i++) {
                 WorldObject* obj = &world->worldObjects[i];
 
@@ -57,13 +60,29 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
                 }
             }
 
+            //
+            // if it is not interactive, we check the terrain hit
+            //
             if (!isInteractiveClicked) {  // raycost to terrain
-                RayCollision hit =
-                    GetRayCollisionMesh(player->ray, world->activeChunk->model.meshes[0],
-                                        world->activeChunk->model.transform);
+                RayCollision rayToTerrains = {0};
 
-                if (hit.hit) {
-                    player->targetLocation = hit.point;
+                printf("RAY: %f, %f, %f\n", player->ray.position.x, player->ray.position.y,
+                       player->ray.position.z);
+
+                for (int i = 0; i < world->chunkCount; i++) {
+                    Chunk chunk = world->chunks[i];
+
+                    rayToTerrains =
+                        GetRayCollisionMesh(player->ray, world->chunks[i].model.meshes[0],
+                                            world->chunks[i].model.transform);
+
+                    if (rayToTerrains.hit) {
+                        break;
+                    }
+                }
+
+                if (rayToTerrains.hit) {
+                    player->targetLocation = rayToTerrains.point;
                     player->hasTarget = true;
                     Network_SendMovement(
                         player->id, (NetVec3){player->targetLocation.x, player->targetLocation.y,
@@ -93,8 +112,19 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
 
             // get world active chunk mesh instance
 
-            nextPos.y = GetHeightFromMesh(world->activeChunk->model.meshes[0],
-                                          world->activeChunk->model.transform, nextPos.x, nextPos.z);
+            float z = 0;
+            for (int i = 0; i < world->chunkCount; i++) {
+                float tmpZ = GetHeightFromMesh(world->chunks[i].model.meshes[0],
+                                               world->chunks[i].model.transform, nextPos.x,
+                                               nextPos.z);  // segfault
+
+                if (tmpZ != 0.00000000f) {
+                    z = tmpZ;
+                    break;
+                }
+            }
+
+            nextPos.y = z;
 
             player->isColliding = false;
 

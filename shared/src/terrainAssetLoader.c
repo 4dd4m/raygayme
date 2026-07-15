@@ -1,5 +1,6 @@
 #include "terrainAssetLoader.h"
 
+#include <assetLoader.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -240,18 +241,9 @@ void UnloadServerTerrainData() {
 void LoadServerTerrainData() {
     UnloadServerTerrainData();  // unload first to avoid garbage memory data
 
-    terrainData.chunkCount = 1;
-    terrainData.chunks = calloc(1u, sizeof(ServerTerrainChunk));
-
-    if (terrainData.chunks == NULL) {  // if the allocation has been failed
-        terrainData.chunkCount = 0;
-        return;
-    }
-
     ServerVec2i spawnChunk = {0, 0};  // first initial chunk
 
-    if (!load_chunk_by_coord(spawnChunk,
-                             &terrainData.chunks[0])) {  // load the chunk, unload if fails
+    if (LoadServerTerrainChunkByCoord(spawnChunk) == -1) {  // load the chunk, unload if fails
         UnloadServerTerrainData();
         return;
     }
@@ -267,4 +259,38 @@ ServerTerrainData* GetInitialTerrainData() {
     }
 
     return &terrainData;
+}
+
+int LoadServerTerrainChunkByCoord(ServerVec2i coord) {  // returns new Chunkindex
+    //
+    // Lookup chunk, if it is loaded, return with the index
+    //
+    if (terrainData.chunkCount != 0) {
+        for (int i = 0; i < terrainData.chunkCount; i++) {
+            if (terrainData.chunks[i].coord.x == coord.x &&
+                terrainData.chunks[i].coord.z == coord.z) {
+                printf("CHUNK CACHE IS USED\n");
+                return i;
+            }
+        }
+    }
+
+    int newIndex =
+        terrainData.chunkCount;  // ha 1 chunk van, akkor ez 1 lesz, mivel a masodik index 1
+
+    ServerTerrainChunk* resized =
+        realloc(terrainData.chunks, (terrainData.chunkCount + 1) * sizeof(ServerTerrainChunk));
+    if (resized == NULL) {
+        return -1;
+    }
+
+    terrainData.chunks = resized;
+    terrainData.chunks[newIndex] = (ServerTerrainChunk){0};
+
+    if (!load_chunk_by_coord(coord, &terrainData.chunks[newIndex])) {
+        return -1;
+    }
+
+    terrainData.chunkCount++;
+    return newIndex;
 }

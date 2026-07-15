@@ -118,6 +118,7 @@ void InitWorld(World* world, ServerVec2i chunkCoord) {
     UpdateLightView(world);
 
     SetShaderValueTexture(world->shadowShader, world->shadowMapLoc, world->shadowMap.texture);
+
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
         SetModelShader(&world->chunks[chunkIndex].model, world->shadowShader);
     }
@@ -139,10 +140,13 @@ void RenderWorldShadowMap(World* world) {
     ClearBackground(WHITE);
     BeginMode3D(world->lightCamera);
 
+    //
+    // Shadow pass on chunks
+    //
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
         Chunk* chunk = &world->chunks[chunkIndex];
         SetModelShader(&chunk->model, world->shadowDepthShader);
-        DrawModel(chunk->model, GetChunkWorldPosition(chunk), 1.0f, WHITE);
+        DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
     }
     if (world->worldObjects && world->worldObjectCount > 0) {
         for (int i = 0; i < world->worldObjectCount; i++) {
@@ -190,10 +194,19 @@ void DrawWorld(World* world, Camera3D camera) {
         }
     }
 
-    // draw terrain
+    //
+    // Draw Chunks
+    //
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
         Chunk* chunk = &world->chunks[chunkIndex];
-        DrawModel(chunk->model, GetChunkWorldPosition(chunk), 1.0f, GRAY);
+        DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, GRAY);
+
+        char chunkLabel[32];
+        snprintf(chunkLabel, sizeof(chunkLabel), "%d,%d", chunk->coord.x, chunk->coord.z);
+        Vector3 labelWorldPosition = {chunk->coord.x * 100.0f + 50.0f, 3.0f,
+                                      chunk->coord.z * 100.0f + 50.0f};
+        Vector2 labelScreenPosition = GetWorldToScreen(labelWorldPosition, camera);
+        DrawText(chunkLabel, (int)labelScreenPosition.x, (int)labelScreenPosition.y, 50, BLUE);
     }
 
     // draw all world objects
@@ -257,7 +270,3 @@ void ShutdownWorld(World* world) {
 
     free(world->worldObjects);
 }
-
-
-
-

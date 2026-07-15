@@ -39,3 +39,5 @@ const ServerTerrainData* GetServerTerrainData();
 ServerTerrainData* GetInitialTerrainData();
 void UnloadServerTerrainData();
 void LoadServerTerrainData();
+
+int LoadServerTerrainChunkByCoord(ServerVec2i coord);

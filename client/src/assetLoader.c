@@ -95,8 +95,8 @@ Model LoadTerrainModelByCoords(ServerVec2i coords) {
         return (Model){0};
     }
 
-    int written = snprintf(fileNameBuffer, (size_t)length + 1u,
-                           "../assets/chunks/CHUNK_%d_%d.glb", coords.x, coords.z);
+    int written = snprintf(fileNameBuffer, (size_t)length + 1u, "../assets/chunks/CHUNK_%d_%d.glb",
+                           coords.x, coords.z);
     if (written != length) {
         free(fileNameBuffer);
         return (Model){0};
@@ -305,7 +305,3 @@ error:
     if (worldObjectCount) *worldObjectCount = 0;
     return NULL;
 }
-
-
-
-

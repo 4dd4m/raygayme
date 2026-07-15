@@ -39,6 +39,15 @@ typedef struct CollisionObject {
     Matrix transform;
 } CollisionObject;
 
+typedef struct HeightMap {
+    float* heights;
+    int gridWidth;
+    int gridDepth;
+    float cellSizeX;
+    float cellSizeZ;
+    Vector3 origin;
+} HeightMap;
+
 typedef struct Chunk {
     ChunkCoord coord;
 
