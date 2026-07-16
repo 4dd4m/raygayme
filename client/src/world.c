@@ -18,8 +18,17 @@ static void SetModelShader(Model *model, Shader shader) {
     }
 }
 
-static void DrawWorldObjectModel(WorldObject obj, Color tint) {
-    DrawModelEx(*obj.model, obj.position, (Vector3){0.0f, 1.0f, 0.0f}, obj.rotation.y * RAD2DEG, obj.scale, tint);
+Matrix GetWorldObjectTransform(const WorldObject *obj) {
+    Matrix scale = MatrixScale(obj->scale.x, obj->scale.y, obj->scale.z);
+    Matrix rotation = MatrixRotateY(obj->rotation.y);
+    Matrix translation = MatrixTranslate(obj->position.x, obj->position.y, obj->position.z);
+    Matrix objectTransform = MatrixMultiply(MatrixMultiply(scale, rotation), translation);
+
+    return MatrixMultiply(obj->model->transform, objectTransform);
+}
+
+void DrawWorldObjectModel(const WorldObject *obj, Color tint) {
+    DrawModelEx(*obj->model, obj->position, (Vector3){0.0f, 1.0f, 0.0f}, obj->rotation.y * RAD2DEG, obj->scale, tint);
 }
 
 static void UpdateLightView(World *world) {
@@ -145,7 +154,7 @@ void RenderWorldShadowMap(World *world) {
             WorldObject obj = world->worldObjects[i];
             if (obj.model) {
                 SetModelShader(obj.model, world->shadowDepthShader);
-                DrawWorldObjectModel(obj, WHITE);
+                DrawWorldObjectModel(&obj, WHITE);
                 SetModelShader(obj.model, world->shadowShader);
             }
         }
@@ -179,7 +188,8 @@ void DrawWorld(World *world, Camera3D camera) {
         }
 
         for (int meshIndex = 0; meshIndex < obj->model->meshCount; meshIndex++) {
-            RayCollision collision = GetRayCollisionMesh(staticRay, obj->model->meshes[meshIndex], obj->transform);
+            Matrix transform = GetWorldObjectTransform(obj);
+            RayCollision collision = GetRayCollisionMesh(staticRay, obj->model->meshes[meshIndex], transform);
 
             if (collision.hit && obj->interactive) {
                 obj->isMouseOver = true;
@@ -212,13 +222,13 @@ void DrawWorld(World *world, Camera3D camera) {
 
             if (obj.isMouseOver) {
                 SetModelShader(obj.model, world->outlineShader);
-                DrawWorldObjectModel(obj, WHITE);
+                DrawWorldObjectModel(&obj, WHITE);
 
                 SetModelShader(obj.model, world->shadowShader);
-                DrawWorldObjectModel(obj, WHITE);
+                DrawWorldObjectModel(&obj, WHITE);
             } else {
                 SetModelShader(obj.model, world->shadowShader);
-                DrawWorldObjectModel(obj, WHITE);
+                DrawWorldObjectModel(&obj, WHITE);
             }
 
             break;

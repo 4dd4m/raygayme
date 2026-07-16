@@ -46,8 +46,9 @@ void UpdatePlayer(Player *player, MyCamera *camera, World *world) {
                     continue;
                 }
 
+                Matrix transform = GetWorldObjectTransform(obj);
                 RayCollision interactiveRayCollision =
-                    GetRayCollisionMesh(player->ray, obj->model->meshes[0], obj->transform);
+                    GetRayCollisionMesh(player->ray, obj->model->meshes[0], transform);
 
                 if (interactiveRayCollision.hit) {
                     isInteractiveClicked = true;

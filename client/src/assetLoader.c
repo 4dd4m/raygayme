@@ -275,9 +275,7 @@ WorldObject *LoadStaticAssetsForChunk(int chunkId, int *worldObjectCount) {
         if (Debug)
             printf("TYPEID: %d", parsedType);
 
-        // calculate WorldObjectTransform
         Model *model = &(GetAsset((AssetId)parsedType)->model);
-        Matrix transform = MatrixMultiply(model->transform, MatrixTranslate(position.x, position.y, position.z));
 
         // bounding box by default goes to origin, so pull it back where the object really
         BoundingBox box = GetModelBoundingBox(*model);
@@ -290,12 +288,11 @@ WorldObject *LoadStaticAssetsForChunk(int chunkId, int *worldObjectCount) {
                                                  .type = parsedType,
                                                  .chunk = parsedChunk,
                                                  .position = position,
-                                                 .rotation = rotation,
-                                                 .scale = scale,
-                                                 .model = model,
-                                                 .transform = transform,
-                                                 .boundingBox = box,
-                                                 .isMouseOver = true};
+                                                  .rotation = rotation,
+                                                  .scale = scale,
+                                                  .model = model,
+                                                  .boundingBox = box,
+                                                  .isMouseOver = true};
 
         if (Debug) {
             fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n", parsedObject.name,

@@ -13,7 +13,6 @@ typedef struct WorldObject {
     Vector3 rotation;
     Vector3 scale;
     Model* model;
-    Matrix transform;
     BoundingBox boundingBox;
     bool isMouseOver;
 } WorldObject;
@@ -92,3 +91,5 @@ void UpdateWorld(World* world);
 void DrawWorld(World* world, Camera3D camera);
 void RenderWorldShadowMap(World* world);
 void ShutdownWorld(World* world);
+Matrix GetWorldObjectTransform(const WorldObject* obj);
+void DrawWorldObjectModel(const WorldObject* obj, Color tint);
