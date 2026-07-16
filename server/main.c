@@ -275,9 +275,15 @@ void UpdatePlayerPosition(PlayerNetState *netState, float delta) {
         }
     }
 
-    float terrainY = GetYcoordByChunkIndex(netState->position.x, netState->position.z, netState->chunkIndex);
-    if (terrainY > -999.0f) {
-        netState->position.y = terrainY;
+    float serverY = 0.0f;
+
+    bool result = GetYcoordByChunkIndex(netState->position.x, netState->position.z, netState->chunkIndex, &serverY);
+    if (result) {
+        if (serverY > -999.0f) {
+            netState->position.y = serverY;
+        } else {
+            netState->position.y = serverY;
+        }
     }
 }
 

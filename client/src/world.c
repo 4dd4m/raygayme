@@ -18,10 +18,6 @@ static void SetModelShader(Model *model, Shader shader) {
     }
 }
 
-static Vector3 GetChunkWorldPosition(const Chunk *chunk) {
-    return (Vector3){chunk->coord.x * CHUNK_WORLD_SIZE, chunk->coord.y, chunk->coord.z * CHUNK_WORLD_SIZE};
-}
-
 static void UpdateLightView(World *world) {
     Vector3 target = (Vector3){0.0f, 0.0f, 0.0f};
     world->lightDir = Vector3Normalize(world->lightDir);
@@ -190,12 +186,6 @@ void DrawWorld(World *world, Camera3D camera) {
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
         Chunk *chunk = &world->chunks[chunkIndex];
         DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, GRAY);
-
-        char chunkLabel[32];
-        snprintf(chunkLabel, sizeof(chunkLabel), "%d,%d", chunk->coord.x, chunk->coord.z);
-        Vector3 labelWorldPosition = {chunk->coord.x * 100.0f + 50.0f, 3.0f, chunk->coord.z * 100.0f + 50.0f};
-        Vector2 labelScreenPosition = GetWorldToScreen(labelWorldPosition, camera);
-        DrawText(chunkLabel, (int)labelScreenPosition.x, (int)labelScreenPosition.y, 50, BLUE);
     }
 
     // draw all world objects

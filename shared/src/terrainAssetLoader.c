@@ -2,6 +2,7 @@
 
 #include <assetLoader.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -274,22 +275,22 @@ int LoadServerTerrainChunkByCoord(ServerVec2i coord) { // returns new Chunkindex
     return newIndex;
 }
 
-float GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkIndex) {
+bool GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkIndex, float *outY) {
     if (chunkIndex < 0 || chunkIndex >= terrainData.chunkCount) {
-        return -1;
+        return false;
     }
 
     ServerTerrainChunk chunkData = terrainData.chunks[chunkIndex];
 
     if (chunkData.heights == NULL || chunkData.gridWidth < 2 || chunkData.gridDepth < 2) {
-        return -1;
+        return false;
     }
 
     float cellSizeX = (chunkData.bounds.max.x - chunkData.bounds.min.x) / (float)(chunkData.gridWidth - 1);
     float cellSizeZ = (chunkData.bounds.max.z - chunkData.bounds.min.z) / (float)(chunkData.gridDepth - 1);
 
     if (cellSizeX <= 0.0f || cellSizeZ <= 0.0f) {
-        return -1;
+        return false;
     }
 
     // the player are here within the grid
@@ -333,5 +334,7 @@ float GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkInd
     float bottom = h00 + (h10 - h00) * tx;
     float top = h01 + (h11 - h01) * tx;
 
-    return bottom + (top - bottom) * tz;
+    *outY = bottom + (top - bottom) * tz;
+
+    return true;
 }

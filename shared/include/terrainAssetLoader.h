@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 typedef struct ServerVec2i {
     int x;
     int z;
@@ -40,4 +42,4 @@ void LoadServerTerrainData();
 
 int LoadServerTerrainChunkByCoord(ServerVec2i coord);
 
-float GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkIndex);
+bool GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkIndex, float *outY);
