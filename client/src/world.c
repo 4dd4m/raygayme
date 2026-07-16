@@ -12,13 +12,13 @@
 #define SHOW_COLLISIONS true
 #define CHUNK_WORLD_SIZE 100.0f
 
-static void SetModelShader(Model *model, Shader shader) {
+static void SetModelShader(Model* model, Shader shader) {
     for (int i = 0; i < model->materialCount; i++) {
         model->materials[i].shader = shader;
     }
 }
 
-Matrix GetWorldObjectTransform(const WorldObject *obj) {
+Matrix GetWorldObjectTransform(const WorldObject* obj) {
     Matrix scale = MatrixScale(obj->scale.x, obj->scale.y, obj->scale.z);
     Matrix rotation = MatrixRotateY(obj->rotation.y);
     Matrix translation = MatrixTranslate(obj->position.x, obj->position.y, obj->position.z);
@@ -27,11 +27,11 @@ Matrix GetWorldObjectTransform(const WorldObject *obj) {
     return MatrixMultiply(obj->model->transform, objectTransform);
 }
 
-void DrawWorldObjectModel(const WorldObject *obj, Color tint) {
+void DrawWorldObjectModel(const WorldObject* obj, Color tint) {
     DrawModelEx(*obj->model, obj->position, (Vector3){0.0f, 1.0f, 0.0f}, obj->rotation.y * RAD2DEG, obj->scale, tint);
 }
 
-static void UpdateLightView(World *world) {
+static void UpdateLightView(World* world) {
     Vector3 target = (Vector3){0.0f, 0.0f, 0.0f};
     world->lightDir = Vector3Normalize(world->lightDir);
 
@@ -47,11 +47,13 @@ static void UpdateLightView(World *world) {
     world->lightViewProj = MatrixMultiply(lightProj, lightView);
 }
 
-void InitWorld(World *world, ServerVec2i chunkCoord) {
+void InitWorld(World* world, ServerVec2i chunkCoord) {
     // printf("### Initializing World\n");
     world->chunkCount = 0;
 
-    Chunk *chunk = &world->chunks[world->chunkCount];
+    GetInitialTerrainData();
+
+    Chunk* chunk = &world->chunks[world->chunkCount];
 
     int i = LoadChunkByCoords(chunk, chunkCoord);
     if (i == 0) {
@@ -70,7 +72,7 @@ void InitWorld(World *world, ServerVec2i chunkCoord) {
             break;
         }
 
-        Chunk *neighbourChunk = &world->chunks[world->chunkCount];
+        Chunk* neighbourChunk = &world->chunks[world->chunkCount];
         if (LoadChunkByCoords(neighbourChunk, neighbours[neighbourIndex])) {
             world->chunkCount++;
         }
@@ -132,9 +134,9 @@ void InitWorld(World *world, ServerVec2i chunkCoord) {
     }
 }
 
-void UpdateWorld(World *world) { (void)world; }
+void UpdateWorld(World* world) { (void)world; }
 
-void RenderWorldShadowMap(World *world) {
+void RenderWorldShadowMap(World* world) {
     UpdateLightView(world);
 
     BeginTextureMode(world->shadowMap);
@@ -145,7 +147,7 @@ void RenderWorldShadowMap(World *world) {
     // Shadow pass on chunks
     //
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
-        Chunk *chunk = &world->chunks[chunkIndex];
+        Chunk* chunk = &world->chunks[chunkIndex];
         SetModelShader(&chunk->model, world->shadowDepthShader);
         DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
     }
@@ -167,7 +169,7 @@ void RenderWorldShadowMap(World *world) {
     EndTextureMode();
 }
 
-void DrawWorld(World *world, Camera3D camera) {
+void DrawWorld(World* world, Camera3D camera) {
     SetShaderValueMatrix(world->shadowShader, world->shadowLightViewProjLoc, world->lightViewProj);
     SetShaderValue(world->shadowShader, world->shadowLightDirLoc, &world->lightDir, SHADER_UNIFORM_VEC3);
 
@@ -182,7 +184,7 @@ void DrawWorld(World *world, Camera3D camera) {
         //
         // Bug: Overlapped interactive object. Raycast should choose the closer one.
         //
-        WorldObject *obj = &world->worldObjects[i];
+        WorldObject* obj = &world->worldObjects[i];
         obj->isMouseOver = false;
 
         if (obj->model == NULL || obj->model->meshCount <= 0) {
@@ -204,7 +206,7 @@ void DrawWorld(World *world, Camera3D camera) {
     // Draw Chunks
     //
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
-        Chunk *chunk = &world->chunks[chunkIndex];
+        Chunk* chunk = &world->chunks[chunkIndex];
         DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, GRAY);
     }
 
@@ -237,13 +239,33 @@ void DrawWorld(World *world, Camera3D camera) {
         }
     }
 
+    //
+    // Draw actual height grid
+    //
+
+    ServerVec3* heights = GetHeightMapGridPointsByChunIndex(0);
+    if (heights != NULL) {
+
+        for (int i = 0; i < 101 * 101; i++) {
+
+            Vector3 centerpos = {
+                .x = heights[i].x - 50,
+                .y = heights[i].y,
+                .z = heights[i].z - 50,
+            };
+
+            DrawSphereEx(centerpos, 0.06f, 2, 2, RED);
+        }
+        free(heights);
+    }
+
     // world absolute origin
     DrawCylinder((Vector3){0}, 0.2f, 0.2f, 50.0f, 4, YELLOW);
 }
 
-void ShutdownWorld(World *world) {
+void ShutdownWorld(World* world) {
     for (int i = 0; i < world->chunkCount; i++) {
-        Chunk *chunk = &world->chunks[i];
+        Chunk* chunk = &world->chunks[i];
         if (chunk->collisions != NULL) {
             free(chunk->collisions);
             chunk->collisions = NULL;

@@ -13,11 +13,11 @@
 
 #define HERE printf("<><>><<>><><> I AM HERE ><><><><><><><><\n");
 
-#define Debug 1
+#define Debug 0
 
 Asset Assets[ASSET_COUNT] = {0};
 
-char *AssetPath[ASSET_COUNT] = {
+char* AssetPath[ASSET_COUNT] = {
     "../assets/chunks/TERRAIN.glb",
     "../assets/assets/ASSET_TREE.glb",
     "../assets/assets/ASSET_TREE_TRUNK.glb",
@@ -25,7 +25,7 @@ char *AssetPath[ASSET_COUNT] = {
     "../assets/collisions/COLLISION_TREE.glb",
 };
 
-Asset *GetAsset(AssetId id) {
+Asset* GetAsset(AssetId id) {
     if (Assets[id].isLoaded) {
         if (Debug)
             printf("Cached Asset >>> \n");
@@ -58,7 +58,7 @@ void UnloadAllAssets() {
     }
 }
 
-static AssetId GetAssetIdFromString(const char *id, const char *type) {
+static AssetId GetAssetIdFromString(const char* id, const char* type) {
     if (type == NULL) {
         fprintf(stderr, "Object %s has invalid Type: %s\n", id ? id : "(null)", type);
         return ASSET_COUNT;
@@ -94,7 +94,7 @@ Model LoadTerrainModelByCoords(ServerVec2i coords) {
         return (Model){0};
     }
 
-    char *fileNameBuffer = calloc((size_t)length + 1u, 1u);
+    char* fileNameBuffer = calloc((size_t)length + 1u, 1u);
     if (fileNameBuffer == NULL) {
         return (Model){0};
     }
@@ -111,7 +111,7 @@ Model LoadTerrainModelByCoords(ServerVec2i coords) {
     return model;
 }
 
-int LoadChunkByCoords(Chunk *chunk, ServerVec2i coords) {
+int LoadChunkByCoords(Chunk* chunk, ServerVec2i coords) {
     if (chunk == NULL) {
         return 0;
     }
@@ -133,7 +133,7 @@ int LoadChunkByCoords(Chunk *chunk, ServerVec2i coords) {
     return 1;
 }
 
-int GetNeighbourChunkCoords(ServerVec2i current, ServerVec2i *out) {
+int GetNeighbourChunkCoords(ServerVec2i current, ServerVec2i* out) {
     out[0] = (ServerVec2i){.x = current.x - 1, .z = current.z - 1}; // top left
     out[1] = (ServerVec2i){.x = current.x, .z = current.z - 1};     // top top
     out[2] = (ServerVec2i){.x = current.x + 1, .z = current.z - 1}; // top right
@@ -145,16 +145,16 @@ int GetNeighbourChunkCoords(ServerVec2i current, ServerVec2i *out) {
     return 8;
 }
 
-WorldObject *LoadChunkAssetsByCoords(ServerVec2i coords, int *worldObjectCount) {
+WorldObject* LoadChunkAssetsByCoords(ServerVec2i coords, int* worldObjectCount) {
     return LoadStaticAssetsForChunk(coords.x, worldObjectCount);
 }
 
-WorldObject *LoadStaticAssetsForChunk(int chunkId, int *worldObjectCount) {
+WorldObject* LoadStaticAssetsForChunk(int chunkId, int* worldObjectCount) {
     if (Debug)
         printf("Load chunk assets\n");
-    char *fileContent = LoadFile("../assets/objects.json");
-    cJSON *json = NULL;
-    WorldObject *worldObjects = NULL;
+    char* fileContent = LoadFile("../assets/objects.json");
+    cJSON* json = NULL;
+    WorldObject* worldObjects = NULL;
     int objectCount = 0;
     int i = 0;
     if (worldObjectCount) {
@@ -169,13 +169,13 @@ WorldObject *LoadStaticAssetsForChunk(int chunkId, int *worldObjectCount) {
         goto error;
     }
 
-    const cJSON *objects = NULL;
-    const cJSON *object = NULL;
-    const cJSON *positions = NULL;
+    const cJSON* objects = NULL;
+    const cJSON* object = NULL;
+    const cJSON* positions = NULL;
     Vector3 position = {0};
-    const cJSON *rotations = NULL;
+    const cJSON* rotations = NULL;
     Vector3 rotation = {0};
-    const cJSON *scales = NULL;
+    const cJSON* scales = NULL;
     Vector3 scale = {1.0f, 1.0f, 1.0f};
 
     objects = cJSON_GetObjectItemCaseSensitive(json, "objects");
@@ -194,11 +194,11 @@ WorldObject *LoadStaticAssetsForChunk(int chunkId, int *worldObjectCount) {
         printf("--- Found %d objects\n", objectCount);
 
     cJSON_ArrayForEach(object, objects) {
-        cJSON *id = cJSON_GetObjectItemCaseSensitive(object, "id");
-        cJSON *interactive = cJSON_GetObjectItemCaseSensitive(object, "interactive");
-        cJSON *name = cJSON_GetObjectItemCaseSensitive(object, "name");
-        cJSON *type = cJSON_GetObjectItemCaseSensitive(object, "type");
-        cJSON *chunk = cJSON_GetObjectItemCaseSensitive(object, "chunk");
+        cJSON* id = cJSON_GetObjectItemCaseSensitive(object, "id");
+        cJSON* interactive = cJSON_GetObjectItemCaseSensitive(object, "interactive");
+        cJSON* name = cJSON_GetObjectItemCaseSensitive(object, "name");
+        cJSON* type = cJSON_GetObjectItemCaseSensitive(object, "type");
+        cJSON* chunk = cJSON_GetObjectItemCaseSensitive(object, "chunk");
         bool isInteractive = false;
         int parsedChunk = 0;
         int parsedType = 0;
@@ -275,7 +275,7 @@ WorldObject *LoadStaticAssetsForChunk(int chunkId, int *worldObjectCount) {
         if (Debug)
             printf("TYPEID: %d", parsedType);
 
-        Model *model = &(GetAsset((AssetId)parsedType)->model);
+        Model* model = &(GetAsset((AssetId)parsedType)->model);
 
         // bounding box by default goes to origin, so pull it back where the object really
         BoundingBox box = GetModelBoundingBox(*model);
@@ -288,11 +288,11 @@ WorldObject *LoadStaticAssetsForChunk(int chunkId, int *worldObjectCount) {
                                                  .type = parsedType,
                                                  .chunk = parsedChunk,
                                                  .position = position,
-                                                  .rotation = rotation,
-                                                  .scale = scale,
-                                                  .model = model,
-                                                  .boundingBox = box,
-                                                  .isMouseOver = true};
+                                                 .rotation = rotation,
+                                                 .scale = scale,
+                                                 .model = model,
+                                                 .boundingBox = box,
+                                                 .isMouseOver = true};
 
         if (Debug) {
             fprintf(stdout, "%s\t\t Type:%d\tId:%s | X: %.17g Y: %.17g Z: %.17g\n", parsedObject.name,

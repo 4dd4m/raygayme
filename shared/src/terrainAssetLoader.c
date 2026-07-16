@@ -14,12 +14,18 @@
 
 static ServerTerrainData terrainData = {0};
 
-static char *duplicate_string(const char *source) {
+typedef struct Vector3 {
+    float x;
+    float y;
+    float z;
+} Vector3;
+
+static char* duplicate_string(const char* source) {
     if (source == NULL)
         return NULL;
 
     size_t length = strlen(source);
-    char *copy = malloc(length + 1);
+    char* copy = malloc(length + 1);
     if (copy == NULL)
         return NULL;
 
@@ -27,14 +33,14 @@ static char *duplicate_string(const char *source) {
     return copy;
 }
 
-static char *build_chunk_file_name(ServerVec2i coord, const char *extension) {
+static char* build_chunk_file_name(ServerVec2i coord, const char* extension) {
     // build the Chunk_X_X.extension filename
     int length = snprintf(NULL, 0, "Chunk%d_%d.%s", coord.x, coord.z,
                           extension); // assembling the filenames length
     if (length < 0)
         return NULL;
 
-    char *fileName = malloc((size_t)length + 1u); // memory for the filename
+    char* fileName = malloc((size_t)length + 1u); // memory for the filename
     if (fileName == NULL)
         return NULL;
 
@@ -44,7 +50,7 @@ static char *build_chunk_file_name(ServerVec2i coord, const char *extension) {
     return fileName;
 }
 
-static char *join_path(const char *directory, const char *fileName) {
+static char* join_path(const char* directory, const char* fileName) {
     if (directory == NULL || fileName == NULL)
         return NULL;
 
@@ -54,7 +60,7 @@ static char *join_path(const char *directory, const char *fileName) {
         directoryLength > 0 && directory[directoryLength - 1] != '/' && directory[directoryLength - 1] != '\\';
     size_t length = directoryLength + (needsSlash ? 1u : 0u) + fileNameLength;
 
-    char *path = malloc(length + 1);
+    char* path = malloc(length + 1);
     if (path == NULL)
         return NULL;
 
@@ -65,13 +71,13 @@ static char *join_path(const char *directory, const char *fileName) {
     return path;
 }
 
-static int parse_vec3(const cJSON *array, ServerVec3 *out) {
+static int parse_vec3(const cJSON* array, ServerVec3* out) {
     if (!cJSON_IsArray(array) || cJSON_GetArraySize(array) != 3 || out == NULL)
         return 0;
 
-    const cJSON *x = cJSON_GetArrayItem(array, 0);
-    const cJSON *y = cJSON_GetArrayItem(array, 1);
-    const cJSON *z = cJSON_GetArrayItem(array, 2);
+    const cJSON* x = cJSON_GetArrayItem(array, 0);
+    const cJSON* y = cJSON_GetArrayItem(array, 1);
+    const cJSON* z = cJSON_GetArrayItem(array, 2);
     if (!cJSON_IsNumber(x) || !cJSON_IsNumber(y) || !cJSON_IsNumber(z))
         return 0;
 
@@ -83,12 +89,12 @@ static int parse_vec3(const cJSON *array, ServerVec3 *out) {
     return 1;
 }
 
-static int parse_vec2i(const cJSON *array, ServerVec2i *out) {
+static int parse_vec2i(const cJSON* array, ServerVec2i* out) {
     if (!cJSON_IsArray(array) || cJSON_GetArraySize(array) != 2 || out == NULL)
         return 0;
 
-    const cJSON *x = cJSON_GetArrayItem(array, 0);
-    const cJSON *z = cJSON_GetArrayItem(array, 1);
+    const cJSON* x = cJSON_GetArrayItem(array, 0);
+    const cJSON* z = cJSON_GetArrayItem(array, 1);
     if (!cJSON_IsNumber(x) || !cJSON_IsNumber(z))
         return 0;
 
@@ -96,7 +102,7 @@ static int parse_vec2i(const cJSON *array, ServerVec2i *out) {
     return 1;
 }
 
-static int load_height_file(const char *heightPath, ServerTerrainChunk *chunk) {
+static int load_height_file(const char* heightPath, ServerTerrainChunk* chunk) {
     if (heightPath == NULL || chunk == NULL || chunk->gridWidth <= 0 || chunk->gridDepth <= 0) {
         return 0;
     }
@@ -106,7 +112,7 @@ static int load_height_file(const char *heightPath, ServerTerrainChunk *chunk) {
     if (chunk->heights == NULL)
         return 0;
 
-    FILE *file = fopen(heightPath, "rb");
+    FILE* file = fopen(heightPath, "rb");
     if (file == NULL) {
         fprintf(stderr, "Could not open height file: %s\n", heightPath);
         return 0;
@@ -123,7 +129,7 @@ static int load_height_file(const char *heightPath, ServerTerrainChunk *chunk) {
     return 1;
 }
 
-static void free_chunk(ServerTerrainChunk *chunk) {
+static void free_chunk(ServerTerrainChunk* chunk) {
     if (chunk == NULL)
         return;
 
@@ -133,20 +139,20 @@ static void free_chunk(ServerTerrainChunk *chunk) {
     *chunk = (ServerTerrainChunk){0};
 }
 
-static int parse_chunk_json(const cJSON *chunkJson, const char *heightFileName, const char *heightPath,
-                            ServerTerrainChunk *chunk) {
+static int parse_chunk_json(const cJSON* chunkJson, const char* heightFileName, const char* heightPath,
+                            ServerTerrainChunk* chunk) {
     if (!cJSON_IsObject(chunkJson) || heightFileName == NULL || heightPath == NULL || chunk == NULL) {
         return 0;
     }
 
-    const cJSON *id = cJSON_GetObjectItemCaseSensitive(chunkJson, "id");
-    const cJSON *coord = cJSON_GetObjectItemCaseSensitive(chunkJson, "coord");
-    const cJSON *origin = cJSON_GetObjectItemCaseSensitive(chunkJson, "origin");
-    const cJSON *gridWidth = cJSON_GetObjectItemCaseSensitive(chunkJson, "gridWidth");
-    const cJSON *gridDepth = cJSON_GetObjectItemCaseSensitive(chunkJson, "gridDepth");
-    const cJSON *bounds = cJSON_GetObjectItemCaseSensitive(chunkJson, "bounds");
-    const cJSON *boundsMin = cJSON_GetObjectItemCaseSensitive(bounds, "min");
-    const cJSON *boundsMax = cJSON_GetObjectItemCaseSensitive(bounds, "max");
+    const cJSON* id = cJSON_GetObjectItemCaseSensitive(chunkJson, "id");
+    const cJSON* coord = cJSON_GetObjectItemCaseSensitive(chunkJson, "coord");
+    const cJSON* origin = cJSON_GetObjectItemCaseSensitive(chunkJson, "origin");
+    const cJSON* gridWidth = cJSON_GetObjectItemCaseSensitive(chunkJson, "gridWidth");
+    const cJSON* gridDepth = cJSON_GetObjectItemCaseSensitive(chunkJson, "gridDepth");
+    const cJSON* bounds = cJSON_GetObjectItemCaseSensitive(chunkJson, "bounds");
+    const cJSON* boundsMin = cJSON_GetObjectItemCaseSensitive(bounds, "min");
+    const cJSON* boundsMax = cJSON_GetObjectItemCaseSensitive(bounds, "max");
 
     if (!cJSON_IsString(id) || id->valuestring == NULL || !cJSON_IsNumber(gridWidth) || !cJSON_IsNumber(gridDepth)) {
         return 0;
@@ -167,13 +173,13 @@ static int parse_chunk_json(const cJSON *chunkJson, const char *heightFileName, 
     return 1;
 }
 
-static int load_chunk_by_coord(ServerVec2i coord, ServerTerrainChunk *chunk) {
-    char *jsonFileName = build_chunk_file_name(coord, "json");
-    char *heightFileName = build_chunk_file_name(coord, "height");
-    char *jsonPath = join_path(HEIGHTMAPS_DIR, jsonFileName);     // Chunk_X_X.json
-    char *heightPath = join_path(HEIGHTMAPS_DIR, heightFileName); // Chink_X_X.height
-    char *fileContent = NULL;
-    cJSON *json = NULL;
+static int load_chunk_by_coord(ServerVec2i coord, ServerTerrainChunk* chunk) {
+    char* jsonFileName = build_chunk_file_name(coord, "json");
+    char* heightFileName = build_chunk_file_name(coord, "height");
+    char* jsonPath = join_path(HEIGHTMAPS_DIR, jsonFileName);     // Chunk_X_X.json
+    char* heightPath = join_path(HEIGHTMAPS_DIR, heightFileName); // Chink_X_X.height
+    char* fileContent = NULL;
+    cJSON* json = NULL;
     int success = 0;
 
     if (jsonFileName == NULL || heightFileName == NULL || jsonPath == NULL || heightPath == NULL) {
@@ -209,7 +215,7 @@ cleanup:
     return success;
 }
 
-const ServerTerrainData *GetServerTerrainData() { return &terrainData; }
+const ServerTerrainData* GetServerTerrainData() { return &terrainData; }
 
 void UnloadServerTerrainData() {
     for (int i = 0; i < terrainData.chunkCount; i++) {
@@ -233,7 +239,7 @@ void LoadServerTerrainData() {
     printf("Parsed %d terrain chunk(s) from chunk files\n", terrainData.chunkCount);
 }
 
-ServerTerrainData *GetInitialTerrainData() {
+ServerTerrainData* GetInitialTerrainData() {
     LoadServerTerrainData();
 
     if (terrainData.chunkCount == 0) {
@@ -258,7 +264,7 @@ int LoadServerTerrainChunkByCoord(ServerVec2i coord) { // returns new Chunkindex
 
     int newIndex = terrainData.chunkCount; // ha 1 chunk van, akkor ez 1 lesz, mivel a masodik index 1
 
-    ServerTerrainChunk *resized =
+    ServerTerrainChunk* resized =
         realloc(terrainData.chunks, (terrainData.chunkCount + 1) * sizeof(ServerTerrainChunk));
     if (resized == NULL) {
         return -1;
@@ -275,7 +281,7 @@ int LoadServerTerrainChunkByCoord(ServerVec2i coord) { // returns new Chunkindex
     return newIndex;
 }
 
-bool GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkIndex, float *outY) {
+bool GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkIndex, float* outY) {
     if (chunkIndex < 0 || chunkIndex >= terrainData.chunkCount) {
         return false;
     }
@@ -337,4 +343,42 @@ bool GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkInde
     *outY = bottom + (top - bottom) * tz;
 
     return true;
+}
+
+ServerVec3* GetHeightMapGridPointsByChunIndex(int chunkIndex) {
+    if (chunkIndex < 0 || chunkIndex >= terrainData.chunkCount) {
+        printf("Height 1 NULL. ChunkIndex %d, ChunkCount: %d\n", chunkIndex, terrainData.chunkCount);
+        return NULL;
+    }
+
+    ServerTerrainChunk chunkData = terrainData.chunks[chunkIndex];
+
+    if (chunkData.heights == NULL || chunkData.gridWidth < 2 || chunkData.gridDepth < 2) {
+        printf("heighst 2 NULL\n");
+        return NULL;
+    }
+
+    ServerVec3* vecs = calloc(chunkData.gridWidth * chunkData.gridDepth, sizeof(Vector3));
+    if (vecs == NULL) {
+        printf("heighst 3 NULL\n");
+        exit(0);
+    }
+
+    int chunkStartX = 0;
+    int chunkStartZ = 0;
+
+    //  "heightOrder": "z-major: heights[z * gridWidth + x]",
+
+    for (size_t z = 0; z < chunkData.gridDepth; z++) {
+        for (size_t x = 0; x < chunkData.gridWidth; x++) {
+
+            int index = z * chunkData.gridWidth + x;
+
+            float height = chunkData.heights[index];
+
+            vecs[index] = (ServerVec3){.x = chunkStartX + x, .y = height, .z = chunkStartZ + z};
+        }
+    }
+
+    return vecs;
 }
