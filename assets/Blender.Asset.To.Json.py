@@ -90,6 +90,16 @@ def nearest_vertex_height(verts, game_x, game_z):
     return nearest_height
 
 
+def select_object_hierarchy(obj):
+    obj.select_set(True)
+    for child in obj.children:
+        select_object_hierarchy(child)
+
+
+def get_selected_mesh_count():
+    return sum(1 for selected in bpy.context.selected_objects if selected.type == "MESH")
+
+
 def export_terrain_chunk(obj):
     depsgraph = bpy.context.evaluated_depsgraph_get()
     evaluated_obj = obj.evaluated_get(depsgraph)
@@ -294,17 +304,26 @@ for obj in bpy.context.scene.objects:
         f"{object_type}.glb"
     )
 
-    # Select only the current object
     bpy.ops.object.select_all(action="DESELECT")
 
-    obj.select_set(True)
+    select_object_hierarchy(obj)
     bpy.context.view_layer.objects.active = obj
+    selected_names = [selected.name for selected in bpy.context.selected_objects]
+    selected_mesh_count = get_selected_mesh_count()
+
+    print(
+        f"Preparing asset export '{object_type}' from '{obj.name}': "
+        f"selected {len(selected_names)} object(s), {selected_mesh_count} mesh object(s): {selected_names}"
+    )
 
     original_location = obj.location.copy()
     original_rotation = obj.rotation_euler.copy()
     original_scale = obj.scale.copy()
 
     try:
+        if selected_mesh_count == 0:
+            print(f"WARNING: Asset '{object_type}' has no selected mesh objects before export")
+
         # Export the model around the world origin
         obj.location = (0.0, 0.0, 0.0)
         obj.rotation_euler = (0.0, 0.0, 0.0)
@@ -325,10 +344,11 @@ for obj in bpy.context.scene.objects:
         )
 
         exported_types.add(object_type)
+        output_size = os.path.getsize(output_path) if os.path.exists(output_path) else 0
 
         print(
             f"Exported type '{object_type}' "
-            f"from object '{obj.name}' to '{output_path}'"
+            f"from object '{obj.name}' to '{output_path}' ({output_size} bytes)"
         )
 
     finally:

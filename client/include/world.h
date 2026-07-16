@@ -11,6 +11,7 @@ typedef struct WorldObject {
     int chunk;
     Vector3 position;
     Vector3 rotation;
+    Vector3 scale;
     Model* model;
     Matrix transform;
     BoundingBox boundingBox;

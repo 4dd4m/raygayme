@@ -18,6 +18,10 @@ static void SetModelShader(Model *model, Shader shader) {
     }
 }
 
+static void DrawWorldObjectModel(WorldObject obj, Color tint) {
+    DrawModelEx(*obj.model, obj.position, (Vector3){0.0f, 1.0f, 0.0f}, obj.rotation.y * RAD2DEG, obj.scale, tint);
+}
+
 static void UpdateLightView(World *world) {
     Vector3 target = (Vector3){0.0f, 0.0f, 0.0f};
     world->lightDir = Vector3Normalize(world->lightDir);
@@ -141,7 +145,7 @@ void RenderWorldShadowMap(World *world) {
             WorldObject obj = world->worldObjects[i];
             if (obj.model) {
                 SetModelShader(obj.model, world->shadowDepthShader);
-                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                DrawWorldObjectModel(obj, WHITE);
                 SetModelShader(obj.model, world->shadowShader);
             }
         }
@@ -162,7 +166,11 @@ void DrawWorld(World *world, Camera3D camera) {
 
     Ray staticRay = GetScreenToWorldRay(GetMousePosition(), camera);
 
+    //
+    // Set mousover on interactive objects
+    //
     for (int i = 0; i < world->worldObjectCount; i++) {
+
         WorldObject *obj = &world->worldObjects[i];
         obj->isMouseOver = false;
 
@@ -188,7 +196,9 @@ void DrawWorld(World *world, Camera3D camera) {
         DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, GRAY);
     }
 
+    //
     // draw all world objects
+    //
     for (int i = 0; i < world->worldObjectCount; i++) {
         WorldObject obj = world->worldObjects[i];
 
@@ -202,13 +212,13 @@ void DrawWorld(World *world, Camera3D camera) {
 
             if (obj.isMouseOver) {
                 SetModelShader(obj.model, world->outlineShader);
-                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                DrawWorldObjectModel(obj, WHITE);
 
                 SetModelShader(obj.model, world->shadowShader);
-                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                DrawWorldObjectModel(obj, WHITE);
             } else {
                 SetModelShader(obj.model, world->shadowShader);
-                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+                DrawWorldObjectModel(obj, WHITE);
             }
 
             break;
