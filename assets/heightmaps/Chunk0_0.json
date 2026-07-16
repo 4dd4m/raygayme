@@ -11,10 +11,8 @@
         -21.434429168701172,
         -50.0
     ],
-    "gridWidth": 61,
-    "gridDepth": 55,
-    "cellSizeX": 9.999999996068709e-06,
-    "cellSizeZ": 2.272730000000003,
+    "gridWidth": 101,
+    "gridDepth": 101,
     "bounds": {
         "min": [
             -50.00006103515625,

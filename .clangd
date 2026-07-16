@@ -1,0 +1,5 @@
+CompileFlags:
+  Add:
+    - -std=c99
+    - -IC:/Users/Dev/raylibTest/client/include
+    - -IC:/Users/Dev/raylibTest/shared/include

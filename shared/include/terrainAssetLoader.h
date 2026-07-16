@@ -17,27 +17,27 @@ typedef struct ServerTerrainBounds {
 } ServerTerrainBounds;
 
 typedef struct ServerTerrainChunk {
-    char* id;
-    char* heightFile;
+    char *id;
+    char *heightFile;
     ServerVec2i coord;
     ServerVec3 origin;
     int gridWidth;
     int gridDepth;
-    float cellSizeX;
-    float cellSizeZ;
-    float* heights;
+    float *heights;
     int heightCount;
     ServerTerrainBounds bounds;
 } ServerTerrainChunk;
 
 typedef struct ServerTerrainData {
-    ServerTerrainChunk* chunks;
+    ServerTerrainChunk *chunks;
     int chunkCount;
 } ServerTerrainData;
 
-const ServerTerrainData* GetServerTerrainData();
-ServerTerrainData* GetInitialTerrainData();
+const ServerTerrainData *GetServerTerrainData();
+ServerTerrainData *GetInitialTerrainData();
 void UnloadServerTerrainData();
 void LoadServerTerrainData();
 
 int LoadServerTerrainChunkByCoord(ServerVec2i coord);
+
+float GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkIndex);

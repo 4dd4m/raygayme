@@ -12,18 +12,17 @@
 #define SHOW_COLLISIONS true
 #define CHUNK_WORLD_SIZE 100.0f
 
-static void SetModelShader(Model* model, Shader shader) {
+static void SetModelShader(Model *model, Shader shader) {
     for (int i = 0; i < model->materialCount; i++) {
         model->materials[i].shader = shader;
     }
 }
 
-static Vector3 GetChunkWorldPosition(const Chunk* chunk) {
-    return (Vector3){chunk->coord.x * CHUNK_WORLD_SIZE, chunk->coord.y,
-                     chunk->coord.z * CHUNK_WORLD_SIZE};
+static Vector3 GetChunkWorldPosition(const Chunk *chunk) {
+    return (Vector3){chunk->coord.x * CHUNK_WORLD_SIZE, chunk->coord.y, chunk->coord.z * CHUNK_WORLD_SIZE};
 }
 
-static void UpdateLightView(World* world) {
+static void UpdateLightView(World *world) {
     Vector3 target = (Vector3){0.0f, 0.0f, 0.0f};
     world->lightDir = Vector3Normalize(world->lightDir);
 
@@ -34,16 +33,16 @@ static void UpdateLightView(World* world) {
     world->lightCamera.projection = CAMERA_ORTHOGRAPHIC;
 
     Matrix lightView = GetCameraMatrix(world->lightCamera);
-    Matrix lightProj = MatrixOrtho(-LIGHT_ORTHO_SIZE, LIGHT_ORTHO_SIZE, -LIGHT_ORTHO_SIZE,
-                                   LIGHT_ORTHO_SIZE, 0.1f, 100.0f);
+    Matrix lightProj =
+        MatrixOrtho(-LIGHT_ORTHO_SIZE, LIGHT_ORTHO_SIZE, -LIGHT_ORTHO_SIZE, LIGHT_ORTHO_SIZE, 0.1f, 100.0f);
     world->lightViewProj = MatrixMultiply(lightProj, lightView);
 }
 
-void InitWorld(World* world, ServerVec2i chunkCoord) {
+void InitWorld(World *world, ServerVec2i chunkCoord) {
     // printf("### Initializing World\n");
     world->chunkCount = 0;
 
-    Chunk* chunk = &world->chunks[world->chunkCount];
+    Chunk *chunk = &world->chunks[world->chunkCount];
 
     int i = LoadChunkByCoords(chunk, chunkCoord);
     if (i == 0) {
@@ -62,7 +61,7 @@ void InitWorld(World* world, ServerVec2i chunkCoord) {
             break;
         }
 
-        Chunk* neighbourChunk = &world->chunks[world->chunkCount];
+        Chunk *neighbourChunk = &world->chunks[world->chunkCount];
         if (LoadChunkByCoords(neighbourChunk, neighbours[neighbourIndex])) {
             world->chunkCount++;
         }
@@ -77,14 +76,11 @@ void InitWorld(World* world, ServerVec2i chunkCoord) {
     // SET Shaders
 
     world->shadowShader = LoadShader("../assets/shaders/shadow.vs", "../assets/shaders/shadow.fs");
-    world->shadowDepthShader =
-        LoadShader("../assets/shaders/shadow_depth.vs", "../assets/shaders/shadow_depth.fs");
+    world->shadowDepthShader = LoadShader("../assets/shaders/shadow_depth.vs", "../assets/shaders/shadow_depth.fs");
 
     // outline shader
-    world->outlineShader =
-        LoadShader("../assets/shaders/outline.vs", "../assets/shaders/outline.fs");
-    world->outlineShader.locs[SHADER_LOC_MATRIX_MVP] =
-        GetShaderLocation(world->outlineShader, "mvp");
+    world->outlineShader = LoadShader("../assets/shaders/outline.vs", "../assets/shaders/outline.fs");
+    world->outlineShader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(world->outlineShader, "mvp");
     world->outlineColorLoc = GetShaderLocation(world->outlineShader, "outlineColor");
     world->outlineSizeLoc = GetShaderLocation(world->outlineShader, "outlineSize");
 
@@ -97,18 +93,14 @@ void InitWorld(World* world, ServerVec2i chunkCoord) {
     SetShaderValue(world->outlineShader, world->outlineSizeLoc, &outlineSize, SHADER_UNIFORM_FLOAT);
 
     world->shadowShader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(world->shadowShader, "mvp");
-    world->shadowShader.locs[SHADER_LOC_MATRIX_MODEL] =
-        GetShaderLocation(world->shadowShader, "matModel");
-    world->shadowShader.locs[SHADER_LOC_MAP_DIFFUSE] =
-        GetShaderLocation(world->shadowShader, "texture0");
-    world->shadowShader.locs[SHADER_LOC_COLOR_DIFFUSE] =
-        GetShaderLocation(world->shadowShader, "colDiffuse");
+    world->shadowShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(world->shadowShader, "matModel");
+    world->shadowShader.locs[SHADER_LOC_MAP_DIFFUSE] = GetShaderLocation(world->shadowShader, "texture0");
+    world->shadowShader.locs[SHADER_LOC_COLOR_DIFFUSE] = GetShaderLocation(world->shadowShader, "colDiffuse");
     world->shadowLightViewProjLoc = GetShaderLocation(world->shadowShader, "lightViewProj");
     world->shadowLightDirLoc = GetShaderLocation(world->shadowShader, "lightDir");
     world->shadowMapLoc = GetShaderLocation(world->shadowShader, "shadowMap");
 
-    world->shadowDepthShader.locs[SHADER_LOC_MATRIX_MVP] =
-        GetShaderLocation(world->shadowDepthShader, "mvp");
+    world->shadowDepthShader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(world->shadowDepthShader, "mvp");
 
     world->shadowMap = LoadRenderTexture(SHADOWMAP_SIZE, SHADOWMAP_SIZE);
     SetTextureFilter(world->shadowMap.texture, TEXTURE_FILTER_BILINEAR);
@@ -131,9 +123,9 @@ void InitWorld(World* world, ServerVec2i chunkCoord) {
     }
 }
 
-void UpdateWorld(World* world) { (void)world; }
+void UpdateWorld(World *world) { (void)world; }
 
-void RenderWorldShadowMap(World* world) {
+void RenderWorldShadowMap(World *world) {
     UpdateLightView(world);
 
     BeginTextureMode(world->shadowMap);
@@ -144,7 +136,7 @@ void RenderWorldShadowMap(World* world) {
     // Shadow pass on chunks
     //
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
-        Chunk* chunk = &world->chunks[chunkIndex];
+        Chunk *chunk = &world->chunks[chunkIndex];
         SetModelShader(&chunk->model, world->shadowDepthShader);
         DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
     }
@@ -166,17 +158,16 @@ void RenderWorldShadowMap(World* world) {
     EndTextureMode();
 }
 
-void DrawWorld(World* world, Camera3D camera) {
+void DrawWorld(World *world, Camera3D camera) {
     SetShaderValueMatrix(world->shadowShader, world->shadowLightViewProjLoc, world->lightViewProj);
-    SetShaderValue(world->shadowShader, world->shadowLightDirLoc, &world->lightDir,
-                   SHADER_UNIFORM_VEC3);
+    SetShaderValue(world->shadowShader, world->shadowLightDirLoc, &world->lightDir, SHADER_UNIFORM_VEC3);
 
-    DrawGrid(10, 10);
+    DrawGrid(20, 5);
 
     Ray staticRay = GetScreenToWorldRay(GetMousePosition(), camera);
 
     for (int i = 0; i < world->worldObjectCount; i++) {
-        WorldObject* obj = &world->worldObjects[i];
+        WorldObject *obj = &world->worldObjects[i];
         obj->isMouseOver = false;
 
         if (obj->model == NULL || obj->model->meshCount <= 0) {
@@ -184,8 +175,7 @@ void DrawWorld(World* world, Camera3D camera) {
         }
 
         for (int meshIndex = 0; meshIndex < obj->model->meshCount; meshIndex++) {
-            RayCollision collision =
-                GetRayCollisionMesh(staticRay, obj->model->meshes[meshIndex], obj->transform);
+            RayCollision collision = GetRayCollisionMesh(staticRay, obj->model->meshes[meshIndex], obj->transform);
 
             if (collision.hit && obj->interactive) {
                 obj->isMouseOver = true;
@@ -198,13 +188,12 @@ void DrawWorld(World* world, Camera3D camera) {
     // Draw Chunks
     //
     for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
-        Chunk* chunk = &world->chunks[chunkIndex];
+        Chunk *chunk = &world->chunks[chunkIndex];
         DrawModel(chunk->model, (Vector3){0.0f, 0.0f, 0.0f}, 1.0f, GRAY);
 
         char chunkLabel[32];
         snprintf(chunkLabel, sizeof(chunkLabel), "%d,%d", chunk->coord.x, chunk->coord.z);
-        Vector3 labelWorldPosition = {chunk->coord.x * 100.0f + 50.0f, 3.0f,
-                                      chunk->coord.z * 100.0f + 50.0f};
+        Vector3 labelWorldPosition = {chunk->coord.x * 100.0f + 50.0f, 3.0f, chunk->coord.z * 100.0f + 50.0f};
         Vector2 labelScreenPosition = GetWorldToScreen(labelWorldPosition, camera);
         DrawText(chunkLabel, (int)labelScreenPosition.x, (int)labelScreenPosition.y, 50, BLUE);
     }
@@ -214,25 +203,25 @@ void DrawWorld(World* world, Camera3D camera) {
         WorldObject obj = world->worldObjects[i];
 
         switch (obj.type) {
-            case COLLISION_TREE:
-                if (SHOW_COLLISIONS) {
-                    DrawBoundingBox(obj.boundingBox, RED);
-                }
-                break;
-            default:
+        case COLLISION_TREE:
+            if (SHOW_COLLISIONS) {
+                DrawBoundingBox(obj.boundingBox, RED);
+            }
+            break;
+        default:
 
-                if (obj.isMouseOver) {
-                    SetModelShader(obj.model, world->outlineShader);
-                    DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+            if (obj.isMouseOver) {
+                SetModelShader(obj.model, world->outlineShader);
+                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
 
-                    SetModelShader(obj.model, world->shadowShader);
-                    DrawModel(*obj.model, obj.position, 1.0f, WHITE);
-                } else {
-                    SetModelShader(obj.model, world->shadowShader);
-                    DrawModel(*obj.model, obj.position, 1.0f, WHITE);
-                }
+                SetModelShader(obj.model, world->shadowShader);
+                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+            } else {
+                SetModelShader(obj.model, world->shadowShader);
+                DrawModel(*obj.model, obj.position, 1.0f, WHITE);
+            }
 
-                break;
+            break;
         }
     }
 
@@ -240,9 +229,9 @@ void DrawWorld(World* world, Camera3D camera) {
     DrawCylinder((Vector3){0}, 0.2f, 0.2f, 50.0f, 4, YELLOW);
 }
 
-void ShutdownWorld(World* world) {
+void ShutdownWorld(World *world) {
     for (int i = 0; i < world->chunkCount; i++) {
-        Chunk* chunk = &world->chunks[i];
+        Chunk *chunk = &world->chunks[i];
         if (chunk->collisions != NULL) {
             free(chunk->collisions);
             chunk->collisions = NULL;

@@ -10,17 +10,14 @@ typedef struct NetVec3 {
     float z;
 } NetVec3;
 
-typedef enum PlayerMoveState {
-    PLAYER_MOVE_IDLE,
-    PLAYER_MOVE_WALKING,
-    PLAYER_MOVE_RUNNING
-} PlayerMoveState;
+typedef enum PlayerMoveState { PLAYER_MOVE_IDLE, PLAYER_MOVE_WALKING, PLAYER_MOVE_RUNNING } PlayerMoveState;
 
 typedef struct PlayerNetState {
     int id;
     NetVec3 position;
     NetVec3 targetPosition;
     ServerVec2i chunkCoord;
+    int chunkIndex;
     float velocity;
     bool hasTarget;
     float yaw;

@@ -9,7 +9,7 @@
 
 char playerBuffer[128];
 
-void InitPlayer(Player* player) {
+void InitPlayer(Player *player) {
     player->id = 0;
     player->position = (Vector3){40.0f, 0.0f, 10.0f};
     player->hasPosition = true;
@@ -20,12 +20,12 @@ void InitPlayer(Player* player) {
     player->movementSpeed = 3.0f;
 }
 
-void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
+void UpdatePlayer(Player *player, MyCamera *camera, World *world) {
     bool isInteractiveClicked = false;
 
-    player->boundingBox = (BoundingBox){
-        .min = {player->position.x - 0.5f, player->position.y, player->position.z - 0.5f},
-        .max = {player->position.x + 0.5f, player->position.y + 1.7f, player->position.z + 0.5f}};
+    player->boundingBox =
+        (BoundingBox){.min = {player->position.x - 0.5f, player->position.y, player->position.z - 0.5f},
+                      .max = {player->position.x + 0.5f, player->position.y + 1.8f, player->position.z + 0.5f}};
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         player->ray = GetScreenToWorldRay(GetMousePosition(), camera->Camera);
@@ -36,7 +36,7 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
             // checking if we hitting interactive object
             //
             for (int i = 0; i < world->worldObjectCount; i++) {
-                WorldObject* obj = &world->worldObjects[i];
+                WorldObject *obj = &world->worldObjects[i];
 
                 if (!obj->interactive) {
                     continue;
@@ -53,9 +53,8 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
                     isInteractiveClicked = true;
                     player->hasTarget = true;
                     player->targetLocation = world->worldObjects[i].position;
-                    Network_SendMovement(
-                        player->id, (NetVec3){player->targetLocation.x, player->targetLocation.y,
-                                              player->targetLocation.z});
+                    Network_SendMovement(player->id, (NetVec3){player->targetLocation.x, player->targetLocation.y,
+                                                               player->targetLocation.z});
                     break;
                 }
             }
@@ -63,18 +62,16 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
             //
             // if it is not interactive, we check the terrain hit
             //
-            if (!isInteractiveClicked) {  // raycost to terrain
+            if (!isInteractiveClicked) { // raycost to terrain
                 RayCollision rayToTerrains = {0};
 
-                printf("RAY: %f, %f, %f\n", player->ray.position.x, player->ray.position.y,
-                       player->ray.position.z);
+                printf("RAY: %f, %f, %f\n", player->ray.position.x, player->ray.position.y, player->ray.position.z);
 
                 for (int i = 0; i < world->chunkCount; i++) {
                     Chunk chunk = world->chunks[i];
 
-                    rayToTerrains =
-                        GetRayCollisionMesh(player->ray, world->chunks[i].model.meshes[0],
-                                            world->chunks[i].model.transform);
+                    rayToTerrains = GetRayCollisionMesh(player->ray, world->chunks[i].model.meshes[0],
+                                                        world->chunks[i].model.transform);
 
                     if (rayToTerrains.hit) {
                         break;
@@ -84,9 +81,8 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
                 if (rayToTerrains.hit) {
                     player->targetLocation = rayToTerrains.point;
                     player->hasTarget = true;
-                    Network_SendMovement(
-                        player->id, (NetVec3){player->targetLocation.x, player->targetLocation.y,
-                                              player->targetLocation.z});
+                    Network_SendMovement(player->id, (NetVec3){player->targetLocation.x, player->targetLocation.y,
+                                                               player->targetLocation.z});
                 } else {
                     player->hasTarget = false;
                     player->targetLocation = (Vector3){0};
@@ -107,16 +103,16 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
         if (distance > 0.01f) {
             direction = Vector3Normalize(direction);
 
-            Vector3 nextPos = Vector3Add(
-                player->position, Vector3Scale(direction, player->movementSpeed * GetFrameTime()));
+            Vector3 nextPos =
+                Vector3Add(player->position, Vector3Scale(direction, player->movementSpeed * GetFrameTime()));
 
             // get world active chunk mesh instance
 
             float z = 0;
             for (int i = 0; i < world->chunkCount; i++) {
-                float tmpZ = GetHeightFromMesh(world->chunks[i].model.meshes[0],
-                                               world->chunks[i].model.transform, nextPos.x,
-                                               nextPos.z);  // segfault
+                float tmpZ =
+                    GetHeightFromMesh(world->chunks[i].model.meshes[0], world->chunks[i].model.transform, nextPos.x,
+                                      nextPos.z); // segfault
 
                 if (tmpZ != 0.00000000f) {
                     z = tmpZ;
@@ -131,13 +127,12 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
             // check collision agains world objects
             for (int i = 0; i < world->worldObjectCount; i++) {
                 switch (world->worldObjects[i].type) {
-                    case COLLISION_TREE:
-                        if (CheckCollisionBoxes(player->boundingBox,
-                                                world->worldObjects[i].boundingBox)) {
-                            player->isColliding = true;
-                            break;
-                        }
+                case COLLISION_TREE:
+                    if (CheckCollisionBoxes(player->boundingBox, world->worldObjects[i].boundingBox)) {
+                        player->isColliding = true;
                         break;
+                    }
+                    break;
                 }
             }
 
@@ -148,10 +143,10 @@ void UpdatePlayer(Player* player, MyCamera* camera, World* world) {
     }
 }
 
-void DrawPlayer(Player* player, World* world) {
+void DrawPlayer(Player *player, World *world) {
     // this is player. always visible
     if (player->hasPosition) {
-        DrawCylinder(player->position, 0.5f, 0.5f, 1.7f, 32, RED);
+        DrawCylinder(player->position, 0.5f, 0.5f, 1.8f, 32, RED);
     }
 
     if (player->hasTarget && !player->isColliding) {
@@ -159,14 +154,13 @@ void DrawPlayer(Player* player, World* world) {
     }
 
     if (player->drawCollisionBox &&
-        (player->boundingBox.max.x != 0.0f && player->boundingBox.max.y != 0.0f &&
-         player->boundingBox.max.z != 0.0f && player->boundingBox.min.z != 0.0f &&
-         player->boundingBox.min.z != 0.0f && player->boundingBox.min.z != 0.0f)) {
+        (player->boundingBox.max.x != 0.0f && player->boundingBox.max.y != 0.0f && player->boundingBox.max.z != 0.0f &&
+         player->boundingBox.min.z != 0.0f && player->boundingBox.min.z != 0.0f && player->boundingBox.min.z != 0.0f)) {
         DrawBoundingBox(player->boundingBox, YELLOW);
     }
 }
 
-void UpdatePlayerPosition(Player* player, PlayerNetState* localPlayerNetState) {
+void UpdatePlayerPosition(Player *player, PlayerNetState *localPlayerNetState) {
     player->position.x = localPlayerNetState->position.x;
     player->position.y = localPlayerNetState->position.y;
     player->position.z = localPlayerNetState->position.z;
@@ -174,7 +168,7 @@ void UpdatePlayerPosition(Player* player, PlayerNetState* localPlayerNetState) {
     player->chunkCoord.z = localPlayerNetState->chunkCoord.z;
 }
 
-void MovePlayerOnTerrain(Player* player) {
+void MovePlayerOnTerrain(Player *player) {
     if (fabsf(player->ray.direction.y) > 0.0001f) {
         float t = -player->ray.position.y / player->ray.direction.y;
 
@@ -207,8 +201,8 @@ float GetHeightFromMesh(Mesh mesh, Matrix transform, float worldX, float worldZ)
     return collision.hit ? collision.point.y : 0.0f;
 }
 
-void DebugPlayerPosition(Player* player) {
-    sprintf(playerBuffer, "Player POS: X: %.2f Y: %.2f Z:%.2f\n", player->position.x,
-            player->position.y, player->position.z);
+void DebugPlayerPosition(Player *player) {
+    sprintf(playerBuffer, "Player POS: X: %.2f Y: %.2f Z:%.2f\n", player->position.x, player->position.y,
+            player->position.z);
     DrawText(playerBuffer, 0, 25, 10, WHITE);
 }

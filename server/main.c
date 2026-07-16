@@ -14,7 +14,7 @@
 WorldState worldState = {0};
 
 double GetServerTimeSeconds(void);
-void UpdatePlayerPosition(PlayerNetState* netState, float delta);
+void UpdatePlayerPosition(PlayerNetState *netState, float delta);
 ServerVec2i GetChunkCoordByXandZ(float rayX, float rayZ);
 
 int n = 0;
@@ -70,22 +70,20 @@ int main() {
                                           worldState.players[i].playerNetState.position.x,
                                           worldState.players[i].playerNetState.position.y,
                                           worldState.players[i].playerNetState.position.z,
-                                          worldState.players[i].chunkCoord.x,
-                                          worldState.players[i].chunkCoord.z);
+                                          worldState.players[i].chunkCoord.x, worldState.players[i].chunkCoord.z);
 
                     if (length > 0) {
-                        char* welcomeBuffer = malloc(length + 1);
+                        char *welcomeBuffer = malloc(length + 1);
                         if (welcomeBuffer == NULL) {
                             worldState.players[i].isConnected = false;
                             break;
                         }
 
-                        int written = snprintf(
-                            welcomeBuffer, length + 1, "WELCOME|%d|%f,%f,%f|%d,%d\n", (int)i,
-                            worldState.players[i].playerNetState.position.x,
-                            worldState.players[i].playerNetState.position.y,
-                            worldState.players[i].playerNetState.position.z,
-                            worldState.players[i].chunkCoord.x, worldState.players[i].chunkCoord.z);
+                        int written = snprintf(welcomeBuffer, length + 1, "WELCOME|%d|%f,%f,%f|%d,%d\n", (int)i,
+                                               worldState.players[i].playerNetState.position.x,
+                                               worldState.players[i].playerNetState.position.y,
+                                               worldState.players[i].playerNetState.position.z,
+                                               worldState.players[i].chunkCoord.x, worldState.players[i].chunkCoord.z);
 
                         if (written != length) {
                             free(welcomeBuffer);
@@ -110,7 +108,8 @@ int main() {
         // Receive data from the client
         //
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
-            if (!worldState.players[i].isConnected) continue;
+            if (!worldState.players[i].isConnected)
+                continue;
 
             char buffer[1024];
             int valread = recv(worldState.players[i].socket, buffer, sizeof(buffer) - 1, 0);
@@ -158,7 +157,8 @@ int main() {
         // Broadcast
         //
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
-            if (!worldState.players[i].isConnected) continue;
+            if (!worldState.players[i].isConnected)
+                continue;
             UpdatePlayerPosition(&worldState.players[i].playerNetState, worldState.serverDeltaTime);
         }
 
@@ -166,18 +166,19 @@ int main() {
         int offset = 0;
 
         for (size_t i = 0; i < MAX_PLAYERS; i++) {
-            if (!worldState.players[i].isConnected) continue;
+            if (!worldState.players[i].isConnected)
+                continue;
 
             offset += sprintf(broadcast_buffer + offset, "SNAPSHOT|");
-            offset += sprintf(broadcast_buffer + offset, "%lld:%f,%f,%f|", i,
-                              worldState.players[i].playerNetState.position.x,
-                              worldState.players[i].playerNetState.position.y,
-                              worldState.players[i].playerNetState.position.z);
+            offset += sprintf(
+                broadcast_buffer + offset, "%lld:%f,%f,%f|", i, worldState.players[i].playerNetState.position.x,
+                worldState.players[i].playerNetState.position.y, worldState.players[i].playerNetState.position.z);
         }
 
         if (offset > 0) {
             for (size_t i = 0; i < MAX_PLAYERS; i++) {
-                if (!worldState.players[i].isConnected) continue;
+                if (!worldState.players[i].isConnected)
+                    continue;
                 send(worldState.players[i].socket, broadcast_buffer, strlen(broadcast_buffer), 0);
             }
         }
@@ -208,8 +209,9 @@ double GetServerTimeSeconds(void) {
     return (double)counter.QuadPart / (double)frequency.QuadPart;
 }
 
-void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
-    if (!netState->hasTarget) return;
+void UpdatePlayerPosition(PlayerNetState *netState, float delta) {
+    if (!netState->hasTarget)
+        return;
 
     NetVec3 target = netState->targetPosition;
     NetVec3 position = netState->position;
@@ -219,8 +221,7 @@ void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
         .z = target.z - position.z,
     };
 
-    float toTargetLength =
-        sqrt(toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z);
+    float toTargetLength = sqrt(toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z);
 
     if (toTargetLength < 0.001f) {
         printf("Player toTargetLength too small\n");
@@ -261,7 +262,7 @@ void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
     // printf("Next position ChunkId: %d, %d\n", actualChunk.x, actualChunk.z);
 
     //
-    // Player enters into a new chunk
+    // If player enters into a new chunk
     //
     if (netState->chunkCoord.x != actualChunk.x || netState->chunkCoord.z != actualChunk.z) {
         int newChunkIndex = LoadServerTerrainChunkByCoord(actualChunk);
@@ -269,12 +270,17 @@ void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
             printf("REQUEST NEW CHUNK DATA\n");
             netState->chunkCoord.x = actualChunk.x;
             netState->chunkCoord.z = actualChunk.z;
+            netState->chunkIndex = newChunkIndex;
             printf("CHUNK LOADED\n");
         }
+    }
+
+    float terrainY = GetYcoordByChunkIndex(netState->position.x, netState->position.z, netState->chunkIndex);
+    if (terrainY > -999.0f) {
+        netState->position.y = terrainY;
     }
 }
 
 ServerVec2i GetChunkCoordByXandZ(float rayX, float rayZ) {
-    return (ServerVec2i){.x = floor((rayX + 50.0f) / 100.0f),
-                          .z = floor((rayZ + 50.0f) / 100.0f)};
+    return (ServerVec2i){.x = floor((rayX + 50.0f) / 100.0f), .z = floor((rayZ + 50.0f) / 100.0f)};
 }

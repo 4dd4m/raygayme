@@ -3,9 +3,12 @@ import json
 import os
 import struct
 import uuid
+from mathutils import Vector
 
 objects = []
 terrain_chunks = []
+HEIGHTMAP_TARGET_CELL_SIZE = 1.0
+HEIGHTMAP_RAY_MARGIN = 1000.0
 
 assetId = [
     "TERRAIN",
@@ -22,6 +25,10 @@ assetId = [
 
 def to_game_coords(blender_vec):
     return [blender_vec.x, blender_vec.z, -blender_vec.y]
+
+
+def to_blender_coords(game_x, game_y, game_z):
+    return Vector((game_x, -game_z, game_y))
 
 
 def get_chunk_coord(obj):
@@ -46,6 +53,43 @@ def get_chunk_model_file_name(obj):
     return f"CHUNK_{coord[0]}_{coord[1]}.glb"
 
 
+def sample_terrain_height(evaluated_obj, game_x, game_z, min_game_y, max_game_y):
+    world_origin = to_blender_coords(game_x, max_game_y + HEIGHTMAP_RAY_MARGIN, game_z)
+    world_direction = Vector((0.0, 0.0, -1.0))
+    inverse_matrix = evaluated_obj.matrix_world.inverted()
+    local_origin = inverse_matrix @ world_origin
+    local_direction = (inverse_matrix.to_3x3() @ world_direction).normalized()
+    ray_distance = (max_game_y - min_game_y) + HEIGHTMAP_RAY_MARGIN * 2.0
+
+    hit, local_location, _normal, _face_index = evaluated_obj.ray_cast(
+        local_origin,
+        local_direction,
+        distance=ray_distance
+    )
+
+    if not hit:
+        return None
+
+    world_location = evaluated_obj.matrix_world @ local_location
+    return to_game_coords(world_location)[1]
+
+
+def nearest_vertex_height(verts, game_x, game_z):
+    nearest_height = 0.0
+    nearest_distance_sq = None
+
+    for vert in verts:
+        dx = vert[0] - game_x
+        dz = vert[2] - game_z
+        distance_sq = dx * dx + dz * dz
+
+        if nearest_distance_sq is None or distance_sq < nearest_distance_sq:
+            nearest_distance_sq = distance_sq
+            nearest_height = vert[1]
+
+    return nearest_height
+
+
 def export_terrain_chunk(obj):
     depsgraph = bpy.context.evaluated_depsgraph_get()
     evaluated_obj = obj.evaluated_get(depsgraph)
@@ -55,33 +99,11 @@ def export_terrain_chunk(obj):
         mesh.calc_loop_triangles()
 
         verts = []
-        heights_by_xz = {}
-        xs = []
-        zs = []
 
         for vertex in mesh.vertices:
             world_pos = evaluated_obj.matrix_world @ vertex.co
             game_pos = to_game_coords(world_pos)
             verts.append(game_pos)
-
-            x_key = round(game_pos[0], 5)
-            z_key = round(game_pos[2], 5)
-            heights_by_xz[(x_key, z_key)] = game_pos[1]
-            xs.append(x_key)
-            zs.append(z_key)
-
-        unique_xs = sorted(set(xs))
-        unique_zs = sorted(set(zs))
-        grid_width = len(unique_xs)
-        grid_depth = len(unique_zs)
-
-        heights = []
-        for z in unique_zs:
-            for x in unique_xs:
-                heights.append(float(heights_by_xz.get((x, z), 0.0)))
-
-        cell_size_x = unique_xs[1] - unique_xs[0] if grid_width > 1 else 0.0
-        cell_size_z = unique_zs[1] - unique_zs[0] if grid_depth > 1 else 0.0
 
         min_bounds = [
             min(v[0] for v in verts),
@@ -93,6 +115,27 @@ def export_terrain_chunk(obj):
             max(v[1] for v in verts),
             max(v[2] for v in verts),
         ]
+
+        width = max_bounds[0] - min_bounds[0]
+        depth = max_bounds[2] - min_bounds[2]
+        grid_width = max(2, int(round(width / HEIGHTMAP_TARGET_CELL_SIZE)) + 1)
+        grid_depth = max(2, int(round(depth / HEIGHTMAP_TARGET_CELL_SIZE)) + 1)
+        cell_size_x = width / (grid_width - 1)
+        cell_size_z = depth / (grid_depth - 1)
+
+        heights = []
+        missed_samples = 0
+        for z_index in range(grid_depth):
+            z = min_bounds[2] + z_index * cell_size_z
+            for x_index in range(grid_width):
+                x = min_bounds[0] + x_index * cell_size_x
+                height = sample_terrain_height(evaluated_obj, x, z, min_bounds[1], max_bounds[1])
+
+                if height is None:
+                    missed_samples += 1
+                    height = nearest_vertex_height(verts, x, z)
+
+                heights.append(float(height))
 
         base_output_path = os.path.dirname(bpy.data.filepath)
         heightmaps_directory = os.path.join(base_output_path, "heightmaps")
@@ -119,8 +162,6 @@ def export_terrain_chunk(obj):
             "origin": [min_bounds[0], min_bounds[1], min_bounds[2]],
             "gridWidth": grid_width,
             "gridDepth": grid_depth,
-            "cellSizeX": cell_size_x,
-            "cellSizeZ": cell_size_z,
             "bounds": {
                 "min": min_bounds,
                 "max": max_bounds,
@@ -129,6 +170,9 @@ def export_terrain_chunk(obj):
 
         with open(json_output_path, "w", encoding="utf-8") as f:
             json.dump(height_map_data, f, indent=4)
+
+        if missed_samples > 0:
+            print(f"Terrain chunk '{obj.name}' used nearest vertex fallback for {missed_samples} height samples")
 
         print(f"Exported terrain chunk '{obj.name}' to '{json_output_path}' and '{height_output_path}'")
         return height_map_data
@@ -327,40 +371,25 @@ for obj in bpy.context.scene.objects:
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
 
-    original_location = obj.location.copy()
-    original_rotation = obj.rotation_euler.copy()
-    original_scale = obj.scale.copy()
+    bpy.context.view_layer.update()
 
-    try:
-        obj.location = (0.0, 0.0, 0.0)
-        obj.rotation_euler = (0.0, 0.0, 0.0)
-        obj.scale = (1.0, 1.0, 1.0)
+    bpy.ops.export_scene.gltf(
+        filepath=output_path,
+        export_format="GLB",
+        use_selection=True,
+        export_apply=True,
+        export_yup=True,
+        export_texcoords=True,
+        export_normals=True,
+        export_materials="EXPORT"
+    )
 
-        bpy.context.view_layer.update()
+    exported_chunk_count += 1
 
-        bpy.ops.export_scene.gltf(
-            filepath=output_path,
-            export_format="GLB",
-            use_selection=True,
-            export_apply=True,
-            export_yup=True,
-            export_texcoords=True,
-            export_normals=True,
-            export_materials="EXPORT"
-        )
-
-        exported_chunk_count += 1
-
-        print(
-            f"Exported terrain chunk '{obj.name}' "
-            f"to '{output_path}'"
-        )
-
-    finally:
-        obj.location = original_location
-        obj.rotation_euler = original_rotation
-        obj.scale = original_scale
-        bpy.context.view_layer.update()
+    print(
+        f"Exported terrain chunk '{obj.name}' "
+        f"to '{output_path}'"
+    )
 
 print(f"Exported {exported_chunk_count} terrain chunk models")
 bpy.ops.wm.save_mainfile()

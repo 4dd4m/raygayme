@@ -7,19 +7,19 @@
 #include "network.h"
 #include "raylib.h"
 
-void DrawConnectScreen(Client* client);
-void UpdateConnectScreen(Client* client);
-void DrawConnectingScreen(Client* lient);
-void DrawConnectionFailedScreen(Client* client);
-void UpdateClient(Client* client);
-void DrawClient(Client* client);
-void DrawGame(Client* client);
-static Rectangle GetConnectButtonBounds(Client* client);
+void DrawConnectScreen(Client *client);
+void UpdateConnectScreen(Client *client);
+void DrawConnectingScreen(Client *lient);
+void DrawConnectionFailedScreen(Client *client);
+void UpdateClient(Client *client);
+void DrawClient(Client *client);
+void DrawGame(Client *client);
+static Rectangle GetConnectButtonBounds(Client *client);
 
 int main(void) {
     SetTraceLogLevel(LOG_ERROR);
 
-    Client* client = CreateClient();
+    Client *client = CreateClient();
     if (client == NULL) {
         perror("Client cannot be created\n");
         exit(1);
@@ -37,7 +37,7 @@ int main(void) {
         EndDrawing();
     }
 
-    if (client->clientState == CLIENT_STATE_IN_GAME) {  // only chut down if they were initialized
+    if (client->clientState == CLIENT_STATE_IN_GAME) { // only chut down if they were initialized
         ShutdownWorld(&client->world);
     }
 
@@ -47,78 +47,78 @@ int main(void) {
     return 0;
 }
 
-void UpdateClient(Client* client) {
+void UpdateClient(Client *client) {
     switch (client->clientState) {
-        case CLIENT_STATE_CONNECT_SCREEN:
-            UpdateConnectScreen(client);
-            break;
+    case CLIENT_STATE_CONNECT_SCREEN:
+        UpdateConnectScreen(client);
+        break;
 
-        case CLIENT_STATE_CONNECTING:
-            // blocking call, can freeze on timeout
-            bool isConnected = Network_Init("127.0.0.1", 9999);
-            if (isConnected) {
-                client->clientState = CLIENT_SATE_INIT_PLAYER;
-            } else {
-                client->clientState = CLIENT_STATE_CONNECTION_FAILED;
-            }
-            break;
+    case CLIENT_STATE_CONNECTING:
+        // blocking call, can freeze on timeout
+        bool isConnected = Network_Init("127.0.0.1", 9999);
+        if (isConnected) {
+            client->clientState = CLIENT_SATE_INIT_PLAYER;
+        } else {
+            client->clientState = CLIENT_STATE_CONNECTION_FAILED;
+        }
+        break;
 
-        case CLIENT_SATE_INIT_PLAYER:
-            InitPlayer(&client->player);
-            client->clientState = CLIENT_STATE_WAITING_FOR_WELCOME;
-            break;
+    case CLIENT_SATE_INIT_PLAYER:
+        InitPlayer(&client->player);
+        client->clientState = CLIENT_STATE_WAITING_FOR_WELCOME;
+        break;
 
-        case CLIENT_STATE_WAITING_FOR_WELCOME:
-            Network_ReceiveData(client->world.players, &client->localPlayerNetState);
-            if (client->localPlayerNetState.isConnected) {
-                UpdatePlayerPosition(&client->player, &client->localPlayerNetState);
-                client->clientState = CLIENT_STATE_LOADING;
-            }
-            break;
-
-        case CLIENT_STATE_LOADING:
-            InitPLayerWorldCamera(client);
-            client->clientState = CLIENT_STATE_IN_GAME;
-            break;
-
-        case CLIENT_STATE_IN_GAME:
-            Network_ReceiveData(client->world.players, &client->localPlayerNetState);
+    case CLIENT_STATE_WAITING_FOR_WELCOME:
+        Network_ReceiveData(client->world.players, &client->localPlayerNetState);
+        if (client->localPlayerNetState.isConnected) {
             UpdatePlayerPosition(&client->player, &client->localPlayerNetState);
-            UpdateMyCameraState(&client->Camera, &client->player);
-            UpdateWorld(&client->world);
-            UpdatePlayer(&client->player, &client->Camera, &client->world);
-            break;
+            client->clientState = CLIENT_STATE_LOADING;
+        }
+        break;
 
-        default:
-            break;
+    case CLIENT_STATE_LOADING:
+        InitPLayerWorldCamera(client);
+        client->clientState = CLIENT_STATE_IN_GAME;
+        break;
+
+    case CLIENT_STATE_IN_GAME:
+        Network_ReceiveData(client->world.players, &client->localPlayerNetState);
+        UpdatePlayerPosition(&client->player, &client->localPlayerNetState);
+        UpdateMyCameraState(&client->Camera, &client->player);
+        UpdateWorld(&client->world);
+        UpdatePlayer(&client->player, &client->Camera, &client->world);
+        break;
+
+    default:
+        break;
     }
 }
 
-void DrawClient(Client* client) {
+void DrawClient(Client *client) {
     switch (client->clientState) {
-        case CLIENT_STATE_CONNECT_SCREEN:
-            DrawConnectScreen(client);
-            break;
+    case CLIENT_STATE_CONNECT_SCREEN:
+        DrawConnectScreen(client);
+        break;
 
-        case CLIENT_STATE_CONNECTING:
-            DrawConnectingScreen(client);
-            break;
+    case CLIENT_STATE_CONNECTING:
+        DrawConnectingScreen(client);
+        break;
 
-        case CLIENT_STATE_CONNECTION_FAILED:
-            DrawConnectionFailedScreen(client);
-            break;
+    case CLIENT_STATE_CONNECTION_FAILED:
+        DrawConnectionFailedScreen(client);
+        break;
 
-        case CLIENT_STATE_IN_GAME:
-            DrawGame(client);
+    case CLIENT_STATE_IN_GAME:
+        DrawGame(client);
 
-            break;
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 }
 
-void DrawGame(Client* client) {
+void DrawGame(Client *client) {
     RenderWorldShadowMap(&client->world);
 
     BeginMode3D(client->Camera.Camera);
@@ -131,7 +131,7 @@ void DrawGame(Client* client) {
     DebugPlayerPosition(&client->player);
 }
 
-void DrawConnectScreen(Client* client) {
+void DrawConnectScreen(Client *client) {
     Rectangle connectButton = GetConnectButtonBounds(client);
 
     Vector2 mouse = GetMousePosition();
@@ -146,7 +146,7 @@ void DrawConnectScreen(Client* client) {
     DrawText("CONNECT", (int)(connectButton.x + 45), (int)(connectButton.y + 15), 24, WHITE);
 }
 
-void UpdateConnectScreen(Client* client) {
+void UpdateConnectScreen(Client *client) {
     Rectangle connectButton = GetConnectButtonBounds(client);
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -158,18 +158,18 @@ void UpdateConnectScreen(Client* client) {
     }
 }
 
-void DrawConnectingScreen(Client* client) {  // no UpdateConnecting because this is a static screen
+void DrawConnectingScreen(Client *client) { // no UpdateConnecting because this is a static screen
     int textOffset = 40;
     DrawText("Connecting...", (client->renderConfig->width / 2.0f) - textOffset,
              (client->renderConfig->height / 2.0f) - textOffset, 24, WHITE);
 }
 
-void DrawConnectionFailedScreen(Client* client) {
+void DrawConnectionFailedScreen(Client *client) {
     DrawText("Connection failed", 40, 40, 32, RED);
     DrawText("Press ESC to close", 40, 80, 24, WHITE);
 }
 
-static Rectangle GetConnectButtonBounds(Client* client) {  // to adopt variable size window
+static Rectangle GetConnectButtonBounds(Client *client) { // to adopt variable size window
     float button_width = 220.0f;
     float button_height = 56.0f;
 

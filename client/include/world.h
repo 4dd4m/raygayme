@@ -43,8 +43,6 @@ typedef struct HeightMap {
     float* heights;
     int gridWidth;
     int gridDepth;
-    float cellSizeX;
-    float cellSizeZ;
     Vector3 origin;
 } HeightMap;
 
