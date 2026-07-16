@@ -63,18 +63,30 @@ void UpdatePlayer(Player *player, MyCamera *camera, World *world) {
             // if it is not interactive, we check the terrain hit
             //
             if (!isInteractiveClicked) { // raycost to terrain
+
+                // final cast
                 RayCollision rayToTerrains = {0};
 
                 printf("RAY: %f, %f, %f\n", player->ray.position.x, player->ray.position.y, player->ray.position.z);
 
                 for (int i = 0; i < world->chunkCount; i++) {
-                    Chunk chunk = world->chunks[i];
 
-                    rayToTerrains = GetRayCollisionMesh(player->ray, world->chunks[i].model.meshes[0],
-                                                        world->chunks[i].model.transform);
+                    Chunk *chunk = &world->chunks[i];
 
-                    if (rayToTerrains.hit) {
-                        break;
+                    // cast on this chunk, tmp cast
+                    RayCollision hit = GetRayCollisionMesh(player->ray, chunk->model.meshes[0], chunk->model.transform);
+
+                    // if the cast was NOT succesfull on the actual chunk
+                    if (!hit.hit) {
+                        continue;
+                    }
+
+                    // compare the two hits
+                    bool isFirstTerrainHit = !rayToTerrains.hit;
+                    bool isCloserTerrainHit = hit.distance < rayToTerrains.distance;
+
+                    if (isFirstTerrainHit || isCloserTerrainHit) {
+                        rayToTerrains = hit;
                     }
                 }
 
