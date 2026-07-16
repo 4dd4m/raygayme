@@ -179,7 +179,9 @@ void DrawWorld(World *world, Camera3D camera) {
     // Set mousover on interactive objects
     //
     for (int i = 0; i < world->worldObjectCount; i++) {
-
+        //
+        // Bug: Overlapped interactive object. Raycast should choose the closer one.
+        //
         WorldObject *obj = &world->worldObjects[i];
         obj->isMouseOver = false;
 
