@@ -14,7 +14,7 @@
 WorldState worldState = {0};
 
 double GetServerTimeSeconds(void);
-void UpdatePlayerPosition(PlayerNetState *netState, float delta);
+void UpdatePlayerPosition(PlayerNetState* netState, float delta);
 ServerVec2i GetChunkCoordByXandZ(float rayX, float rayZ);
 
 int n = 0;
@@ -52,7 +52,7 @@ int main() {
                     slot_found = true;
                     worldState.players[i].socket = new_socket;
                     worldState.players[i].playerNetState.id = i;
-                    worldState.players[i].playerNetState.position = (NetVec3){48.0f, 0, 48.0f};
+                    worldState.players[i].playerNetState.position = (NetVec3){49.0f, 0, -42.0f};
                     worldState.players[i].playerNetState.velocity = 0;
                     worldState.players[i].playerNetState.moveState = PLAYER_MOVE_IDLE;
                     worldState.players[i].playerNetState.yaw = 0.0f;
@@ -73,7 +73,7 @@ int main() {
                                           worldState.players[i].chunkCoord.x, worldState.players[i].chunkCoord.z);
 
                     if (length > 0) {
-                        char *welcomeBuffer = malloc(length + 1);
+                        char* welcomeBuffer = malloc(length + 1);
                         if (welcomeBuffer == NULL) {
                             worldState.players[i].isConnected = false;
                             break;
@@ -209,7 +209,7 @@ double GetServerTimeSeconds(void) {
     return (double)counter.QuadPart / (double)frequency.QuadPart;
 }
 
-void UpdatePlayerPosition(PlayerNetState *netState, float delta) {
+void UpdatePlayerPosition(PlayerNetState* netState, float delta) {
     if (!netState->hasTarget)
         return;
 

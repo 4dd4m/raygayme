@@ -7,8 +7,9 @@ from mathutils import Vector
 
 objects = []
 terrain_chunks = []
-HEIGHTMAP_TARGET_CELL_SIZE = 1.0
+HEIGHTMAP_TARGET_CELL_SIZE = 0.5
 HEIGHTMAP_RAY_MARGIN = 1000.0
+HEIGHTMAP_EDGE_SAMPLE_EPSILON = 0.001
 
 assetId = [
     "TERRAIN",
@@ -96,6 +97,11 @@ def select_object_hierarchy(obj):
         select_object_hierarchy(child)
 
 
+def deselect_scene_objects():
+    for obj in bpy.context.scene.objects:
+        obj.select_set(False)
+
+
 def get_selected_mesh_count():
     return sum(1 for selected in bpy.context.selected_objects if selected.type == "MESH")
 
@@ -139,7 +145,20 @@ def export_terrain_chunk(obj):
             z = min_bounds[2] + z_index * cell_size_z
             for x_index in range(grid_width):
                 x = min_bounds[0] + x_index * cell_size_x
-                height = sample_terrain_height(evaluated_obj, x, z, min_bounds[1], max_bounds[1])
+                sample_x = x
+                sample_z = z
+
+                if x_index == 0:
+                    sample_x += HEIGHTMAP_EDGE_SAMPLE_EPSILON
+                elif x_index == grid_width - 1:
+                    sample_x -= HEIGHTMAP_EDGE_SAMPLE_EPSILON
+
+                if z_index == 0:
+                    sample_z += HEIGHTMAP_EDGE_SAMPLE_EPSILON
+                elif z_index == grid_depth - 1:
+                    sample_z -= HEIGHTMAP_EDGE_SAMPLE_EPSILON
+
+                height = sample_terrain_height(evaluated_obj, sample_x, sample_z, min_bounds[1], max_bounds[1])
 
                 if height is None:
                     missed_samples += 1
@@ -304,7 +323,7 @@ for obj in bpy.context.scene.objects:
         f"{object_type}.glb"
     )
 
-    bpy.ops.object.select_all(action="DESELECT")
+    deselect_scene_objects()
 
     select_object_hierarchy(obj)
     bpy.context.view_layer.objects.active = obj
@@ -386,7 +405,7 @@ for obj in bpy.context.scene.objects:
 
     output_path = os.path.join(output_directory, chunk_model_file_name)
 
-    bpy.ops.object.select_all(action="DESELECT")
+    deselect_scene_objects()
 
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj

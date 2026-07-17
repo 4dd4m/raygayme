@@ -10,6 +10,8 @@
 #define LIGHT_DISTANCE 25.0f
 #define LIGHT_ORTHO_SIZE 20.0f
 #define SHOW_COLLISIONS true
+#define SHOW_HEIGHT_GRID_DEBUG true
+#define SHOW_HEIGHT_GRID_MESH_DIFF_DEBUG false
 #define CHUNK_WORLD_SIZE 100.0f
 
 static void SetModelShader(Model* model, Shader shader) {
@@ -243,20 +245,48 @@ void DrawWorld(World* world, Camera3D camera) {
     // Draw actual height grid
     //
 
-    ServerVec3* heights = GetHeightMapGridPointsByChunIndex(0);
-    if (heights != NULL) {
+    if (SHOW_HEIGHT_GRID_DEBUG) {
+        ServerVec3* heights = GetHeightMapGridPointsByChunIndex(0);
+        if (heights != NULL) {
+            const ServerTerrainData* terrainData = GetServerTerrainData();
+            int heightCount = 0;
+            if (terrainData != NULL && terrainData->chunkCount > 0) {
+                heightCount = terrainData->chunks[0].heightCount;
+            }
 
-        for (int i = 0; i < 101 * 101; i++) {
+            for (int i = 0; i < heightCount; i++) {
 
-            Vector3 centerpos = {
-                .x = heights[i].x - 50,
-                .y = heights[i].y,
-                .z = heights[i].z - 50,
-            };
+                Vector3 centerpos = {
+                    .x = heights[i].x,
+                    .y = heights[i].y,
+                    .z = heights[i].z,
+                };
 
-            DrawSphereEx(centerpos, 0.06f, 2, 2, RED);
+                DrawSphereEx(centerpos, 0.06f, 2, 2, RED);
+
+                if (SHOW_HEIGHT_GRID_MESH_DIFF_DEBUG && i % 25 == 0) {
+                    Ray ray = {
+                        .position = {centerpos.x, 1000.0f, centerpos.z},
+                        .direction = {0.0f, -1.0f, 0.0f},
+                    };
+                    RayCollision closestHit = {0};
+
+                    for (int chunkIndex = 0; chunkIndex < world->chunkCount; chunkIndex++) {
+                        Chunk* chunk = &world->chunks[chunkIndex];
+                        RayCollision hit = GetRayCollisionMesh(ray, chunk->model.meshes[0], chunk->model.transform);
+                        if (hit.hit && (!closestHit.hit || hit.distance < closestHit.distance)) {
+                            closestHit = hit;
+                        }
+                    }
+
+                    if (closestHit.hit && fabsf(closestHit.point.y - centerpos.y) > 0.05f) {
+                        DrawLine3D(centerpos, closestHit.point, SKYBLUE);
+                        DrawSphereEx(closestHit.point, 0.08f, 4, 4, SKYBLUE);
+                    }
+                }
+            }
+            free(heights);
         }
-        free(heights);
     }
 
     // world absolute origin

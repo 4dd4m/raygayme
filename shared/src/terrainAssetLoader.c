@@ -318,15 +318,18 @@ bool GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkInde
     // 4 verts of the current cell
     int x0 = (int)floorf(gridX);
     int z0 = (int)floorf(gridZ);
+
+    if (x0 >= chunkData.gridWidth - 1) {
+        x0 = chunkData.gridWidth - 2;
+        gridX = (float)(chunkData.gridWidth - 1);
+    }
+    if (z0 >= chunkData.gridDepth - 1) {
+        z0 = chunkData.gridDepth - 2;
+        gridZ = (float)(chunkData.gridDepth - 1);
+    }
+
     int x1 = x0 + 1;
     int z1 = z0 + 1;
-
-    if (x1 >= chunkData.gridWidth) {
-        x1 = chunkData.gridWidth - 1;
-    }
-    if (z1 >= chunkData.gridDepth) {
-        z1 = chunkData.gridDepth - 1;
-    }
 
     float tx = gridX - (float)x0;
     float tz = gridZ - (float)z0;
@@ -337,10 +340,11 @@ bool GetYcoordByChunkIndex(float playerWorldX, float playerWorldZ, int chunkInde
     float h01 = chunkData.heights[z1 * chunkData.gridWidth + x0];
     float h11 = chunkData.heights[z1 * chunkData.gridWidth + x1];
 
-    float bottom = h00 + (h10 - h00) * tx;
-    float top = h01 + (h11 - h01) * tx;
-
-    *outY = bottom + (top - bottom) * tz;
+    if (tx >= tz) {
+        *outY = h00 + ((h10 - h00) * tx) + ((h11 - h10) * tz);
+    } else {
+        *outY = h00 + ((h11 - h01) * tx) + ((h01 - h00) * tz);
+    }
 
     return true;
 }
@@ -358,14 +362,14 @@ ServerVec3* GetHeightMapGridPointsByChunIndex(int chunkIndex) {
         return NULL;
     }
 
-    ServerVec3* vecs = calloc(chunkData.gridWidth * chunkData.gridDepth, sizeof(Vector3));
+    ServerVec3* vecs = calloc(chunkData.gridWidth * chunkData.gridDepth, sizeof(ServerVec3));
     if (vecs == NULL) {
         printf("heighst 3 NULL\n");
         exit(0);
     }
 
-    int chunkStartX = 0;
-    int chunkStartZ = 0;
+    float cellSizeX = (chunkData.bounds.max.x - chunkData.bounds.min.x) / (float)(chunkData.gridWidth - 1);
+    float cellSizeZ = (chunkData.bounds.max.z - chunkData.bounds.min.z) / (float)(chunkData.gridDepth - 1);
 
     //  "heightOrder": "z-major: heights[z * gridWidth + x]",
 
@@ -376,7 +380,11 @@ ServerVec3* GetHeightMapGridPointsByChunIndex(int chunkIndex) {
 
             float height = chunkData.heights[index];
 
-            vecs[index] = (ServerVec3){.x = chunkStartX + x, .y = height, .z = chunkStartZ + z};
+            vecs[index] = (ServerVec3){
+                .x = chunkData.bounds.min.x + ((float)x * cellSizeX),
+                .y = height,
+                .z = chunkData.bounds.min.z + ((float)z * cellSizeZ),
+            };
         }
     }
 

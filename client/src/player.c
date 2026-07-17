@@ -7,6 +7,8 @@
 #include "network.h"
 #include "raymath.h"
 
+#define SHOW_PLAYER_HEIGHT_DEBUG false
+
 char playerBuffer[128];
 
 void InitPlayer(Player *player) {
@@ -160,6 +162,45 @@ void DrawPlayer(Player *player, World *world) {
     // this is player. always visible
     if (player->hasPosition) {
         DrawCylinder(player->position, 0.5f, 0.5f, 1.8f, 32, RED);
+
+        if (SHOW_PLAYER_HEIGHT_DEBUG) {
+            int heightChunkIndex = -1;
+            const ServerTerrainData* terrainData = GetServerTerrainData();
+            for (int i = 0; terrainData != NULL && i < terrainData->chunkCount; i++) {
+                if (terrainData->chunks[i].coord.x == player->chunkCoord.x &&
+                    terrainData->chunks[i].coord.z == player->chunkCoord.z) {
+                    heightChunkIndex = i;
+                    break;
+                }
+            }
+
+            float heightMapY = 0.0f;
+            if (heightChunkIndex >= 0 &&
+                GetYcoordByChunkIndex(player->position.x, player->position.z, heightChunkIndex, &heightMapY)) {
+                RayCollision closestMeshHit = {0};
+
+                for (int i = 0; i < world->chunkCount; i++) {
+                    Ray ray = {
+                        .position = {player->position.x, 1000.0f, player->position.z},
+                        .direction = {0.0f, -1.0f, 0.0f},
+                    };
+                    RayCollision hit = GetRayCollisionMesh(ray, world->chunks[i].model.meshes[0],
+                                                           world->chunks[i].model.transform);
+                    if (hit.hit && (!closestMeshHit.hit || hit.distance < closestMeshHit.distance)) {
+                        closestMeshHit = hit;
+                    }
+                }
+
+                if (closestMeshHit.hit) {
+                    Vector3 meshPoint = {player->position.x, closestMeshHit.point.y, player->position.z};
+                    Vector3 heightMapPoint = {player->position.x, heightMapY, player->position.z};
+
+                    DrawSphereEx(meshPoint, 0.12f, 6, 6, GREEN);
+                    DrawSphereEx(heightMapPoint, 0.12f, 6, 6, MAGENTA);
+                    DrawLine3D(meshPoint, heightMapPoint, MAGENTA);
+                }
+            }
+        }
     }
 
     if (player->hasTarget && !player->isColliding) {
