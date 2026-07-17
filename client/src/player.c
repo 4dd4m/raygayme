@@ -1,5 +1,6 @@
 #include "player.h"
 
+#include <math.h>
 #include <mycamera.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -8,8 +9,31 @@
 #include "raymath.h"
 
 #define SHOW_PLAYER_HEIGHT_DEBUG false
+#define SERVER_POSITION_XZ_TOLERANCE 0.15f
+#define SERVER_POSITION_XZ_CORRECTION_RATE 18.0f
+#define SERVER_POSITION_XZ_SNAP_DISTANCE 4.0f
 
 char playerBuffer[128];
+
+static void ApplyServerPositionXZ(Player *player, Vector3 serverPosition) {
+    float dx = serverPosition.x - player->position.x;
+    float dz = serverPosition.z - player->position.z;
+    float distance = sqrtf(dx * dx + dz * dz);
+
+    if (distance <= SERVER_POSITION_XZ_TOLERANCE) {
+        return;
+    }
+
+    if (distance >= SERVER_POSITION_XZ_SNAP_DISTANCE) {
+        player->position.x = serverPosition.x;
+        player->position.z = serverPosition.z;
+        return;
+    }
+
+    float blend = 1.0f - expf(-SERVER_POSITION_XZ_CORRECTION_RATE * GetFrameTime());
+    player->position.x += dx * blend;
+    player->position.z += dz * blend;
+}
 
 void InitPlayer(Player *player) {
     player->id = 0;
@@ -152,7 +176,7 @@ void UpdatePlayer(Player *player, MyCamera *camera, World *world) {
             }
 
             if (!player->isColliding) {
-                // player->position = nextPos;
+                player->position = nextPos;
             }
         }
     }
@@ -215,9 +239,14 @@ void DrawPlayer(Player *player, World *world) {
 }
 
 void UpdatePlayerPosition(Player *player, PlayerNetState *localPlayerNetState) {
-    player->position.x = localPlayerNetState->position.x;
+    Vector3 serverPosition = {
+        .x = localPlayerNetState->position.x,
+        .y = localPlayerNetState->position.y,
+        .z = localPlayerNetState->position.z,
+    };
+
+    ApplyServerPositionXZ(player, serverPosition);
     player->position.y = localPlayerNetState->position.y;
-    player->position.z = localPlayerNetState->position.z;
     player->chunkCoord.x = localPlayerNetState->chunkCoord.x;
     player->chunkCoord.z = localPlayerNetState->chunkCoord.z;
 }
